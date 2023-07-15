@@ -2,6 +2,7 @@ import nltk
 from nltk.tokenize import word_tokenize, MWETokenizer
 from nltk.corpus import stopwords
 import lexicons
+import re
 
 #nltk.download("stopwords")
 
@@ -9,12 +10,17 @@ def prune_text(text):
     """
     Preprocessing input text.
     """
-    tokenizer = MWETokenizer(lexicons.mwe_list)
-    tokens = word_tokenize(text)
-    tokens = join_MWE(tokens)
-    tokens = tokenizer.tokenize(tokens) # tokenizing text
-    pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
-    #stop_words = set(stopwords.words('english')) # removing stopwords
+    mwe_tokenizer = MWETokenizer(lexicons.mwe_list) # custom MWE tokenizer with MWE list input
+    tokens = word_tokenize(text) # standard nltk toknizer
+    tokens = join_MWE(tokens) # joining upper-case tokens into MWE
+    tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
+    #pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
+    # TODO: custom stopwords
+    stop_words = set(stopwords.words('english')) # removing stopwords
+    tokens = [token for token in tokens if token.lower() not in stop_words]
+
+    tokens = [token for token in tokens if re.match(r'^[a-zA-Z0-9_-]+$', token)] # removing non-alphanumeric tokens
+
     return tokens
 
 def load_abstract(name):

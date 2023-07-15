@@ -1,0 +1,302 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc} %mogu sa ovim pisati ščđžć
+\usepackage{extsizes} %mogu koristi visinu fonta koju želim 	%
+
+%\usepackage{hyperref} 					
+\usepackage{hhline}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{listings}
+%\usepackage{xcolor}
+\lstset { %
+	language=C++,breaklines=true,showstringspaces=false,
+	backgroundcolor=\color{black!5}, % set backgroundcolor
+	keywordstyle=\color{red},
+	commentstyle=\color{blue},
+	basicstyle=\sffamily,% basic font setting
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=9pt, % this defines how far the numbers are from the text
+}
+
+\usepackage{times}
+
+\usepackage{geometry} %štimanje margina
+\geometry{textwidth=18cm}
+\geometry{textheight=22cm}
+
+\usepackage[english]{babel}
+
+\usepackage{array} %za tabele
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+
+\usepackage{enumitem}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{multicol} % multikolone
+\usepackage{graphicx}
+
+\usepackage[obeyspaces]{url} % for adding paths to a folder
+\graphicspath{{./Figures/}}
+
+%\path{{./Data/}} % adddig a path to a folder
+
+\usepackage{wrapfig} %wraps figure
+\usepackage{lipsum}  %fills text around figure
+
+\usepackage{bm}  %mogu pisati boldirane formule sa simbolima
+
+\usepackage{amssymb} % za pisannje skupova
+
+\usepackage[usestackEOL]{stackengine} %za piasanje front page-a
+\numberwithin{equation}{section}
+
+%\makeatletter
+%\renewcommand{\@seccntformat}[1]{}
+%\makeatother  % removes numbers from sections but keeps the references
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\scriptsize \hspace*{-0.2cm}  Graph-Based Keyword Extraction from
+ \\ Scientific Paper Abstracts using Word Embeddings \\ Author: Dinno Koluh}
+\lhead{\scriptsize Alma Mater Studiorum \\ Universit\`a  di Bologna \\ Department of Computer Science and Engineering}
+
+\usepackage{epsfig}
+\usepackage{multirow}
+\usepackage{pdfpages}
+\setcounter{MaxMatrixCols}{20} % maksimalan broj kolona na 20
+\usepackage{float} % da slike nisu poremećene
+\usepackage[figurename=Slika]{caption} % mijenja ime sa figure u slika
+\usepackage[tablename=Tabela]{caption} % mijenja ime sa figure u slika
+
+\usepackage{chngcntr}
+%\counterwithout{figure}{chapter} % stavlja bojeve unutar captiona slike
+
+\usepackage{colortbl} % color in tables
+
+\addto\captionsenglish{% Replace "english" with the language you use
+	\renewcommand{\contentsname}% Promjena naziva content
+	{Content}%
+}
+
+\usepackage{etoolbox}
+%\patchcmd{\thebibliography}{\section*{\refname}}{}{}{} % smakinje ime references
+
+%\usepackage[colorlinks=true, linkcolor = cyan]{hyperref}
+\usepackage{hyperref}
+
+%rotating picture
+\usepackage{lscape}
+\usepackage{rotating}
+
+% tilda
+\usepackage{undertilde}
+
+%%coloring links
+%\usepackage{hyperref}
+%\hypersetup{
+	%	colorlinks = true,
+	%	linkbordercolor = [white],
+	%	linkcolor = [magenta]
+	%}
+
+%\usepackage[colorlinks]{hyperref}
+%\hypersetup{colorlinks=true, linkcolor=cyan,linkbordercolor=red}
+
+%matlab
+\usepackage{listings}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+
+\lstset{
+	language=Matlab,
+	basicstyle=\footnotesize\ttfamily,
+	breaklines=true,%
+	morekeywords={matlab2tikz},
+	keywordstyle=\color{blue},%
+	morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+	identifierstyle=\color{black},%
+	stringstyle=\color{mylilas},
+	commentstyle=\color{mygreen},%
+	showstringspaces=false,%without this there will be a symbol in the places where there is a space
+	numbers=left,%
+	numberstyle={\tiny \color{black}},% size of the numbers
+	numbersep=9pt, % this defines how far the numbers are from the text
+	emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+	emph=[2]{word1,word2}, emphstyle=[2]{style},   
+}
+
+\addto\captionsenglish{% Replace "english" with the language you use
+	\renewcommand{\contentsname}% Promjena naziva content
+	{Contents}%
+}
+
+% stil numerisanja stranica
+\usepackage{lastpage}
+\cfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}}
+
+\usepackage{etoolbox}
+\patchcmd{\thebibliography}{\section*{\refname}}{}{}{} % smakne ime references
+
+% za pisanje pseudokoda
+\usepackage[plain]{algorithm2e}
+%\usepackage{algorithmic}
+%\usepackage{algpseudocode}
+%\usepackage{algorithmicx}
+%\usepackage{algorithm}
+%\usepackage{algpseudocode}
+%\algnewcommand\algorithmicinput{\textbf{Function:}}
+%\algnewcommand\Function{\item[\algorithmicinput]}
+%\usepackage{capt-of}
+\SetAlgorithmName{Pseudocode}
+
+%\renewcommand{\@algocf@capt@plain}{top}% formerly {bottom}
+
+
+
+\makeatletter
+\newenvironment{breakablealgorithm}
+{% \begin{breakablealgorithm}
+		\begin{center}
+			\refstepcounter{algorithm}% New algorithm
+			\hrule height.8pt depth0pt \kern2pt% \@fs@pre for \@fs@ruled
+			\renewcommand{\caption}[2][\relax]{% Make a new \caption
+				{\raggedright\textbf{\fname@algorithm~\thealgorithm} ##2\par}%
+				\ifx\relax##1\relax % #1 is \relax
+				\addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##2}%
+				\else % #1 is not \relax
+				\addcontentsline{loa}{algorithm}{\protect\numberline{\thealgorithm}##1}%
+				\fi
+				\kern2pt\hrule\kern2pt
+			}
+		}{% \end{breakablealgorithm}
+		\kern2pt\hrule\relax% \@fs@post for \@fs@ruled
+	\end{center}
+}
+\makeatother
+
+\makeatletter
+\newenvironment{breakalgo}[2][alg:\thealgorithm]{%
+	\def\@fs@cfont{\bfseries}%
+	\let\@fs@capt\relax%
+	\par\noindent%
+	\medskip%
+	\rule{\linewidth}{.8pt}%
+	\vspace{-3pt}%
+	\captionof{algorithm}{#2}\label{#1}%
+	\vspace{-1.7\baselineskip}%
+	\noindent\rule{\linewidth}{.4pt}%
+	\vspace{-1.3\baselineskip}%
+}{%
+	\vspace{-.75\baselineskip}%
+	\rule{\linewidth}{.4pt}%
+	\medskip%
+}
+\makeatother
+
+
+\captionsetup{font=small}
+\newcommand*{\matlab}{\textsc{Matlab}}
+\newcommand*{\altmatlab}{{\mdseries\matlab}} 
+
+\usepackage{xcolor}
+
+\newsavebox{\bmatrixbox}
+\newenvironment{colorbmatrix}
+{\begin{lrbox}{\bmatrixbox}
+		\mathsurround=0pt
+		$\displaystyle
+		\begin{bmatrix}}
+		{\end{bmatrix}$%
+	\end{lrbox}%
+	\usebox{\bmatrixbox}%
+	\kern-\wd\bmatrixbox
+	\makebox[0pt][l]{$\left[\vphantom{\usebox{\bmatrixbox}}\right.$}%
+	\kern\wd\bmatrixbox
+}
+
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+
+\begin{document}
+	
+	\begin{titlepage}
+		\begin{center}
+			
+			{\Large ALMA MATER STUDIORUM \\ UNIVERSIT\`A  DI BOLOGNA \\}
+			\vspace{0.4cm} 
+			\hrule
+			\vspace{0.4cm} 
+			{\Large DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING \\} 
+			{\Large ARTIFICIAL INTELLIGENCE \\}
+			\vspace{0.4cm} 
+			\hrule
+			\vspace{1cm}
+			{\Large MASTER THESIS}\\[0.4cm]
+			{\large in} \\[0.4cm]
+			{\Large Natural Language Processing}\\[1cm]
+			
+			\hrule
+			\vspace{0.4cm}
+			
+			{\Huge Graph-Based Keyword Extraction from}\\[0.3cm]
+			{\Huge Scientific Paper Abstracts using Word Embeddings}
+			\vspace{0.4cm}
+			
+			\hrule
+			\vspace{2cm}
+			
+			{\large Author:}\\
+			{\large Dinno Koluh\\}
+			
+			\vspace{2cm}
+			
+			{\large Supervisor:}\\[0.1cm]
+			{\large Prof. Paolo Torroni}\\[0.4cm]
+			
+			{\large Co-Supervisor:}\\[0.1cm]
+			{\large Dr. Federico Ruggeri}
+			
+			\vspace{2cm} 
+			{\large Bologna,}\\[0.1cm] 
+			{\large October 2023.}
+			
+		\end{center}
+	\end{titlepage}
+	\newpage
+	\thispagestyle{empty}
+	
+	\section*{Abstract}
+	This paper deals with path planning for robot manipulators using sampling-based algorithms in a configuration space equipped by a specific cost function. The key algorithm used for path planning is the T-RRT algorithm which is a modification of the basic RRT algorithm. The T-RRT algorithm searches for a path which spans over the regions of the configuration space costmap which represent "passes", "canyons" and "valleys" i.e. regions which have a low cost, while it tends to bypass high cost regions. Using a convenient cost function, which models the problem's criterion, with the T-RRT algorithm we get paths which fulfill the stated criterion while the RRT algorithm, in the general case, is not able to carry out such a task. An example of a criterion which we are going to use is the requirement for the tip of the manipulator to be at the furthest possible distance from the obstacles in the working space which ensures its safety. \\
+	The parameters which are integrated inside the T-RRT algorithm influence its performance and the final shape of the path so a great number of simulations was conducted, with various types of robot manipulators, to analyze the influence of individual parameters on the path. These examples were compared with the shapes of paths obtained with the RRT algorithm. All the algorithms have been implemented within the \textsc{Matlab} programming package. \\
+	
+	\textbf{Keywords}:
+	
+	\newpage
+	\pagestyle{empty}
+	\tableofcontents
+	\setcounter{page}{0}
+	\newpage
+	%\renewcommand{\listfigurename}{Figures}
+	\listoffigures
+	\setcounter{page}{0}
+	\pagebreak
+	
+	%\renewcommand{\listtablename}{Popis tabela}
+%	\listoftables
+%	\thispagestyle{empty}
+%	\setcounter{page}{0}
+%	\pagebreak
+	
+	\newpage
+	\pagestyle{fancy}
+	%\thispagestyle{empty}
+	\section{Introduction}
+	Hello
+\end{document}

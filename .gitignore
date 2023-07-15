@@ -1,3 +1,11 @@
 *venv
 *__pycache__
 ex1.txt
+TODO.txt
+*.aux
+*.lof
+*.log
+*.lot
+*.out
+*.gz
+*.toc
