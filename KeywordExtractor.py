@@ -16,11 +16,11 @@ class KeywordExtractor:
 
     def init_graph(self):
         """
-        Initializes the the graph with the co-occurrence relations where tokens are represented as vertices and edges are the relations between 
+        Initializes the graph with the co-occurrence relations where tokens are represented as vertices and edges are the relations between 
         them. The weights are calculated based on the co-occurrence of tokens in a predefined sliding window.
         """
         graph = nx.Graph()
-        co, index_dict = get_co(self.sentences, self.unique_tokens)
+        co, index_dict = get_co(self.sentences)
         self.co = co # initialize the co-occurrence dictionary
         graph.add_nodes_from(index_dict)
         # unpack the dictionary and initialize the graph with edges and weights

@@ -19,6 +19,7 @@ def prune_text(text):
     tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
     #pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
     tokens = [token.lower() for token in tokens]
+    # TODO: custom stopwords
     stop_words = set(stopwords.words('english')) # removing stopwords
     tokens = [token for token in tokens if token.lower() not in stop_words]
     # extracting sentences from input text
@@ -33,7 +34,6 @@ def prune_text(text):
             sentence = []
             continue
     
-    # TODO: custom stopwords
     tokens = [token for token in tokens if re.match(r'^[a-zA-Z0-9_-]+$', token)] # removing non-alphanumeric tokens
     return tokens, sentences
 
@@ -70,11 +70,12 @@ def join_MWE(tokens):
         i = i + 1
     return out_tokens
 
-def get_co(sentences, unique_tokens, representation='dictionary', window_size=3):
+def get_co(sentences, representation='dictionary', window_size=3):
     """
     Calculates co-occurrence representation for a list of sentences. Choose appropriate window-size
     for your relevant needs. The chosen representation can be either 'dictionary' or 'matrix'.
     """
+    unique_tokens = list(set([token for sentence in sentences for token in sentence]))
     n = len(unique_tokens)
     # Making a dictionary of indexes corresponding to tokens which are also key values. Needed for fast list access.
     # Dictionary is in the form: {token0: 0, token1: 1, ...} 
@@ -98,7 +99,6 @@ def get_co(sentences, unique_tokens, representation='dictionary', window_size=3)
             else:
                 Exception("Wrong graph representation name!")
         return co  
-            
     for sentence in sentences:
         short_sentence = True # in case of sentences that are shorter than the window size
         for i, _ in enumerate(sentence):
@@ -110,6 +110,6 @@ def get_co(sentences, unique_tokens, representation='dictionary', window_size=3)
             co = populate(co, window_tokens)
         if short_sentence:
             #print(sentence) 
-            co = populate(co, window_tokens)
+            co = populate(co, sentence)
     return co, index_dict
 
