@@ -27,7 +27,9 @@ def prune_text(text):
     for token in tokens:
         sentence.append(token)
         if token in ['.', '?', '!']:
-            sentences.append(sentence[0:-1])
+            # clean sentence from non-alphanumeric entries
+            sentence = [t for t in sentence if re.match(r'^[a-zA-Z0-9_-]+$', t)]
+            sentences.append(sentence)
             sentence = []
             continue
     
@@ -36,6 +38,9 @@ def prune_text(text):
     return tokens, sentences
 
 def load_abstract(name):
+    """
+    Load text from file based on the filename.
+    """
     with open('data/' + name + '.txt', 'r') as file:
         abstract = file.read()
     return abstract
@@ -65,24 +70,35 @@ def join_MWE(tokens):
         i = i + 1
     return out_tokens
 
-def get_co_matrix(sentences, unique_tokens, window_size=3):
+def get_co(sentences, unique_tokens, representation='dictionary', window_size=3):
     """
-    Calculates co-occurrence matrix for a list of sentences. Choose appropriate window-size
-    for your relevant needs.
+    Calculates co-occurrence representation for a list of sentences. Choose appropriate window-size
+    for your relevant needs. The chosen representation can be either 'dictionary' or 'matrix'.
     """
     n = len(unique_tokens)
     # Making a dictionary of indexes corresponding to tokens which are also key values. Needed for fast list access.
     # Dictionary is in the form: {token0: 0, token1: 1, ...} 
     index_dict = {key: index for index, key in enumerate(unique_tokens)} 
-    co_matrix = np.zeros(shape=(n,n))
-    def populate_co_matrix(co_matrix, index_dict, window_tokens):
+    co = {} # more compact representation of co-occurrence matrix as dictionary
+    if representation == 'matrix': co = np.zeros(shape=(n,n))
+
+    def populate(co, window_tokens):
         pairs = list(combinations(window_tokens, 2)) # all pair combinations of a list (ex. [1, 2, 3] => (1, 2), (1, 3), (2,3))
         for pair in pairs:
-            t1, t2 = pair
-            co_matrix[index_dict[t1]][index_dict[t2]] += 1
-            co_matrix[index_dict[t2]][index_dict[t1]] += 1
-        return co_matrix    
-    
+            if representation == 'dictionary':
+                pair = tuple(sorted(pair)) # sort tuple alphabetically for undirected graph
+                if pair not in co:
+                    co[pair] = 0
+                co[pair] += 1
+            elif representation == 'matrix':
+                t1, t2 = pair
+                # do it both ways to get symmetric matrix
+                co[index_dict[t1]][index_dict[t2]] += 1
+                co[index_dict[t2]][index_dict[t1]] += 1
+            else:
+                Exception("Wrong graph representation name!")
+        return co  
+            
     for sentence in sentences:
         short_sentence = True # in case of sentences that are shorter than the window size
         for i, _ in enumerate(sentence):
@@ -90,10 +106,10 @@ def get_co_matrix(sentences, unique_tokens, window_size=3):
                 break
             short_sentence = False # means that the sentence is longer than the window size
             window_tokens = sentence[i:i+window_size]
-            print(window_tokens)
-            co_matrix = populate_co_matrix(co_matrix, index_dict, window_tokens)
+            #print(window_tokens)
+            co = populate(co, window_tokens)
         if short_sentence:
-            print(sentence) 
-            co_matrix = populate_co_matrix(co_matrix, index_dict, sentence)
-    return co_matrix, index_dict
+            #print(sentence) 
+            co = populate(co, window_tokens)
+    return co, index_dict
 
