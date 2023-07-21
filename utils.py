@@ -1,11 +1,14 @@
 import nltk
 from nltk.tokenize import word_tokenize, MWETokenizer
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
 import lexicons
 import re
 from gensim.models import Word2Vec
 from itertools import combinations
 import numpy as np
+
 
 #nltk.download("stopwords")
 
@@ -18,7 +21,11 @@ def prune_text(text):
     tokens = join_MWE(tokens) # joining upper-case tokens into MWE
     tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
     #pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
-    tokens = [token.lower() for token in tokens]
+    tokens = [token.lower() for token in tokens] # lower tokens
+
+    # word lemmatization
+    tokens = lemmatize_tokens(tokens)
+
     # TODO: custom stopwords
     stop_words = set(stopwords.words('english')) # removing stopwords
     tokens = [token for token in tokens if token.lower() not in stop_words]
@@ -69,6 +76,25 @@ def join_MWE(tokens):
         out_tokens.append(tokens[i])
         i = i + 1
     return out_tokens
+
+def lemmatize_tokens(tokens):
+    """
+    Lemmatize a list of tokens using PoS tags.
+    """
+    # Map POS tags to WordNet tags
+    tag_map = {
+        'N': wordnet.NOUN,
+        'V': wordnet.VERB,
+        'R': wordnet.ADV,
+        'J': wordnet.ADJ
+    }
+
+    pos_tags = nltk.pos_tag(tokens)
+    #print(pos_tags)
+    lemmatizer = WordNetLemmatizer()
+    # take the first character of the PoS tag and get the wordnet coding from the tag_map dictionary, the default value is wordnet.NOUN
+    lemmatized_tokens = [lemmatizer.lemmatize(token, tag_map.get(pos[0], wordnet.NOUN)) for token, pos in pos_tags]
+    return lemmatized_tokens
 
 def get_co(sentences, representation='dictionary', window_size=3):
     """

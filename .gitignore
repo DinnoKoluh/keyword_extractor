@@ -10,3 +10,5 @@ TODO.txt
 *.gz
 *.toc
 not_used.py
+interactive.py
+*.vscode
