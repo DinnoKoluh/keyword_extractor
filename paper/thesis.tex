@@ -275,10 +275,11 @@
 	
 	\begin{spacing}{1.5}
 	\section*{Abstract}
-	This paper deals with path planning for robot manipulators using sampling-based algorithms in a configuration space equipped by a specific cost function. The key algorithm used for path planning is the T-RRT algorithm which is a modification of the basic RRT algorithm. The T-RRT algorithm searches for a path which spans over the regions of the configuration space costmap which represent "passes", "canyons" and "valleys" i.e. regions which have a low cost, while it tends to bypass high cost regions. Using a convenient cost function, which models the problem's criterion, with the T-RRT algorithm we get paths which fulfill the stated criterion while the RRT algorithm, in the general case, is not able to carry out such a task. An example of a criterion which we are going to use is the requirement for the tip of the manipulator to be at the furthest possible distance from the obstacles in the working space which ensures its safety. \\
-	The parameters which are integrated inside the T-RRT algorithm influence its performance and the final shape of the path so a great number of simulations was conducted, with various types of robot manipulators, to analyze the influence of individual parameters on the path. These examples were compared with the shapes of paths obtained with the RRT algorithm. All the algorithms have been implemented within the \textsc{Matlab} programming package. \\
+	In the era of information overload it became essential to efficiently extract concise, precise and quality information from large texts. One aspect of information extraction is keyword extraction where large texts are represented as sets of tokens and then the most important words i.e. keywords, represent that text. This prospect of keyword extraction is paramount to researchers as they deal with huge numbers of scientific papers, and having a good and concise representation of those papers is essential for them. This thesis paper addresses that problem in the realm of natural language processing (NLP). \\
+	Using core concepts of NLP and modeling texts as graphs, in this paper we are going to build a model for the automatic extraction of keywords. This is done in an unsupervised manner as the importance of a word is calculated through the position and weights associated with respective words in the graph. One of the sources of the word weights are word-embeddings as they became a crucial way of representing words as dense vectors. \\
+	The results of this paper were compared with keywords that were provided by authors of scientific papers in the area of computer science which act as the ground truth, but crucially are not a component in the model construction, but just serve as a verifier of the model's accuracy.
 	
-	\textbf{Keywords}:
+	\textbf{Keywords}: NLP, keyword extraction, scientific papers, graphs, word-embeddings
 	
 	\newpage
 	\pagestyle{empty}
@@ -299,16 +300,73 @@
 	\newpage
 	\pagestyle{fancy}
 	%\thispagestyle{empty}
-	\section{Introduction}
+	\section{Introduction and Motivation}
 	Hello
 	\section{NLP Pipeline}
 	
-	 parameters which are integrated inside the T-RRT algorithm influence its performance and the final shape of the path so a great number of simulations was conducted, with various types of robot manipulators, to analyze the influence of individual parameters on the path. These examples were compared with the shapes of paths obtained with the RRT algorithm. All the algorithms have been 
+	 parameters which are integrated inside the T-RRT algorithm influence its performance and the final shape of the path so a great number of simulations was conducted, with various types of robot manipulators, to analyze the influence of individual parameters on the path. These examples were compared with the shapes of paths obtained with the RRT algorithm. All the algorithms have been \cite{RRT}
 	 
 	\section{Word Embeddings}
 	
 	\section{Graph Construction}
 	
+	\section{Implementation of Keyword Extraction}
+	
+	\section{Testing, Results and Discussion}
+	
+	\section{Conclusion}
+	
+	\newpage
+	\section{Literature}
+	
+	\begin{thebibliography}{8}
+		\bibitem{T-RRT} 
+		Jaillet, Léonard, Juan Cortés, and Thierry Siméon. "\textit{Transition-based RRT for path planning in continuous cost spaces.}" 2008 IEEE/RSJ International Conference on Intelligent Robots and Systems. IEEE, 2008. \\
+		\texttt{URL: }\url{https://hal.laas.fr/hal-01986342/document}
+		
+		\bibitem{RRT}
+		LaValle, Steven M. "\textit{Rapidly-exploring random trees: A new tool for path planning}". Computer Science Department, Iowa State University (TR 98–11), October 1998.\\
+		\texttt{URL: }\url{http://msl.cs.uiuc.edu/~lavalle/papers/Lav98c.pdf}
+		
+		\bibitem{PRM}
+		Kavraki L. E., Svestka P., Latombe J.C., Overmars M. H. "\textit{Probabilistic roadmaps for path planning in high-dimensional configuration spaces.}". IEEE Transactions on Robotics and Automation, 1996. \\
+		\texttt{URL: }\url{http://dspace.library.uu.nl/handle/1874/17328}
+		
+		\bibitem{BiRRT}
+		Kuffner, James J., and Steven M. LaValle. "\textit{RRT-connect: An efficient approach to single-query path planning.}", Proceedings 2000 ICRA. Millennium Conference. IEEE International Conference on Robotics and Automation. Symposia Proceedings (Cat. No. 00CH37065). Vol. 2. IEEE, 2000. \\
+		\texttt{URL: }\url{http://kuffner.org/james/papers/kuffner_icra2000.pdf}
+		
+		\bibitem{proteinFolding}
+		LaValle, Steven M. "\textit{Planning Algorithms}". Cambridge University Press. ISBN 978-1-139-45517-6, May 2006.
+		
+		\bibitem{siciliano}
+		B. Siciliano, L. Sciavicco, L. Villani, and G. Oriolo. "\textit{Robotics: Modelling, Planning and Control}". Springer, London, UK, 2009.
+		
+		\bibitem{MonteCarlo}
+		Kroese D. P., Brereton T., Taimre T., Botev Z. I. "\textit{Why the Monte Carlo method is so important today}", 2014.
+		
+		\bibitem{juricGrafovi}
+		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, 2017. 
+		
+		\bibitem{convexHullAlgo}
+		Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein. "\textit{Introduction to Algorithms}", Second Edition. MIT Press and McGraw-Hill. ISBN 0-262-03293-7. \textit{Section 33.3: Finding the convex hull}, pp. 947–957, 2001.
+		
+		\bibitem{inhull}
+		John D'Errico (2020). Efficient test for points inside a convex hull in n dimensions. \\ \textsc{Matlab} Central File Exchange. Retrieved December 11, 2020. \\ \texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/10226-inhull}
+		
+		\bibitem{p_poly_line}
+		Michael Yoshpe (2020). Distance from points to polyline or polygon. \\
+		\textsc{Matlab} Central File Exchange. Retrieved December 11, 2020. \\ \texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/12744-distance-from-points-to-polyline-or-polygon}
+		
+		\bibitem{vert2lcon}
+		Matt J. (2020). Analyze N-dimensional Polyhedra in terms of Vertices or (In)Equalities. \\
+		\textsc{Matlab} Central File Exchange. Retrieved December 10, 2020\\
+		\texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/30892-analyze-n-dimensional-polyhedra-in-terms-of-vertices-or-in-equalities}
+		
+		\bibitem{lsqlin}
+		\texttt{lsqlin} function description. Solve constrained linear least-squares problems. \\
+		\texttt{URL: }\url{https://www.mathworks.com/help/optim/ug/lsqlin.html}
+	\end{thebibliography}
 
 	\end{spacing}
 	

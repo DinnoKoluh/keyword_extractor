@@ -8,6 +8,7 @@ import re
 from gensim.models import Word2Vec
 from itertools import combinations
 import numpy as np
+from gensim.models import Word2Vec, KeyedVectors
 
 
 #nltk.download("stopwords")
@@ -29,7 +30,7 @@ def prune_text(text):
     # TODO: custom stopwords
     stop_words = set(stopwords.words('english')) # removing stopwords
     tokens = [token for token in tokens if token.lower() not in stop_words]
-    # extracting sentences from input text
+    # extracting sentences from input text (will be later useful when the sliding window crosses between sentences)
     sentences = []
     sentence = []
     for token in tokens:
@@ -139,3 +140,17 @@ def get_co(sentences, representation='dictionary', window_size=3):
             co = populate(co, sentence)
     return co, index_dict
 
+def get_word_em(token):
+    """
+    Function that returns word embedding of a token. If the token is a MWE than it 
+    returns the average vector of all the tokens in the MWE.
+    """
+    model = KeyedVectors.load('data/model.model')
+    tokens = token.split("_") # in case we deal with a MWE
+    embeddings = []
+    for word in tokens:
+        if word in model:
+            embeddings.append(model[word])
+        else:
+            Exception("Word not present in vocabulary!")
+    return sum(embeddings)/len(embeddings) # returning the average vector

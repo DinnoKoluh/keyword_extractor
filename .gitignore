@@ -12,3 +12,5 @@ TODO.txt
 not_used.py
 interactive.py
 *.vscode
+*.model
+*.npy

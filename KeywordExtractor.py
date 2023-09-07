@@ -2,6 +2,7 @@ from utils import *
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 
 # https://networkx.org/documentation/stable/tutorial.html
 
@@ -30,6 +31,15 @@ class KeywordExtractor:
             graph.add_edge(edge[0], edge[1], weight=weight)
         #graph.add_edges_from(co)
         return graph
+    
+    def add_word_em_weights(self):
+        """
+        Reweigh graph by using the word-embeddings of tokens. The new weights are going to be 
+        the product of the similarity between two adjacent nodes and the number of co-occurrences
+        """
+        for u, v, data in self.graph.edges(data=True):
+            if 'weight' in data:
+                data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0]
     
     def visualize_graph(self):
         """
