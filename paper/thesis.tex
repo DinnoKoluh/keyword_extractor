@@ -61,17 +61,19 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{\scriptsize \hspace*{-0.2cm}  Thesis topic: Graph-Based Keyword Extraction from
+\rhead{\scriptsize \hspace*{0cm}  Thesis topic: Graph-Based Keyword Extraction from
  \\ Scientific Paper Abstracts using Word Embeddings \\ Author: Dinno Koluh}
 \lhead{\scriptsize Alma Mater Studiorum \\ Universit\`a  di Bologna \\ Department of Computer Science and Engineering}
+\fancyheadoffset{1cm} % to offset the header by some distance 
+
 
 \usepackage{epsfig}
 \usepackage{multirow}
 \usepackage{pdfpages}
 \setcounter{MaxMatrixCols}{20} % maksimalan broj kolona na 20
 \usepackage{float} % da slike nisu poremećene
-\usepackage[figurename=Slika]{caption} % mijenja ime sa figure u slika
-\usepackage[tablename=Tabela]{caption} % mijenja ime sa figure u slika
+\usepackage[figurename=Figure]{caption} % mijenja ime sa figure u slika
+\usepackage[tablename=Table]{caption} % mijenja ime sa figure u slika
 
 \usepackage{chngcntr}
 %\counterwithout{figure}{chapter} % stavlja bojeve unutar captiona slike
@@ -157,8 +159,6 @@
 \SetAlgorithmName{Pseudocode}
 
 %\renewcommand{\@algocf@capt@plain}{top}% formerly {bottom}
-
-
 
 \makeatletter
 \newenvironment{breakablealgorithm}
@@ -271,6 +271,7 @@
 		\end{center}
 	\end{titlepage}
 	\newpage
+	\newgeometry{textwidth=16cm, textheight=22cm}
 	\thispagestyle{empty}
 	
 	\begin{spacing}{1.5}
@@ -301,10 +302,21 @@
 	\pagestyle{fancy}
 	%\thispagestyle{empty}
 	\section{Introduction and Motivation}
-	Hello
+	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of some key concepts like word-embeddings \cite{we} (which we are going to use) and transformers \cite{transformers}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be shifted a bit from Deep Neural Network (DNN) models and more to the traditional Machine Learning (ML) models. \\
+	NLP has many subfields and application areas such as:
+	\begin{itemize}
+		\item Text classification
+		\item Information retrieval
+		\item Automatic translation
+		\item Speech analysis 
+		\item Question answering
+		\item Conversational agents
+		\item Sentiment analysis
+	\end{itemize} 
+	The field we are going to be working on will be information retrieval, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{PeterTurney}. Scientific papers are usually the area where keyword are most frequently used as researchers use them for a quick overview of the paper and also sorting paper into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions) while keyphrases are a more complicated entity comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
+	The model to be used for keyword extraction is graph-based. The idea is to model words in an abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific [ADJ] paper [N]). Then the question comes how to model the edges of the graph? \\
+	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. So, the idea is to build a sliding window of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information.
 	\section{NLP Pipeline}
-	
-	 parameters which are integrated inside the T-RRT algorithm influence its performance and the final shape of the path so a great number of simulations was conducted, with various types of robot manipulators, to analyze the influence of individual parameters on the path. These examples were compared with the shapes of paths obtained with the RRT algorithm. All the algorithms have been \cite{RRT}
 	 
 	\section{Word Embeddings}
 	

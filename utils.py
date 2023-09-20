@@ -10,6 +10,7 @@ from itertools import combinations
 import numpy as np
 from gensim.models import Word2Vec, KeyedVectors
 
+model = KeyedVectors.load('data/model.model')
 
 #nltk.download("stopwords")
 
@@ -21,11 +22,14 @@ def prune_text(text):
     tokens = word_tokenize(text) # standard nltk toknizer
     tokens = join_MWE(tokens) # joining upper-case tokens into MWE
     tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
+
     #pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
     tokens = [token.lower() for token in tokens] # lower tokens
-
+    	
     # word lemmatization
     tokens = lemmatize_tokens(tokens)
+    tokens = [token for token in tokens if is_token_in_model(token)]  # remove tokens which are not present in model
+
 
     # TODO: custom stopwords
     stop_words = set(stopwords.words('english')) # removing stopwords
@@ -78,7 +82,7 @@ def join_MWE(tokens):
         i = i + 1
     return out_tokens
 
-def lemmatize_tokens(tokens):
+def lemmatize_tokens(tokens) -> [str]:
     """
     Lemmatize a list of tokens using PoS tags.
     """
@@ -91,13 +95,13 @@ def lemmatize_tokens(tokens):
     }
 
     pos_tags = nltk.pos_tag(tokens)
-    #print(pos_tags)
+    # TODO filter out verbs
     lemmatizer = WordNetLemmatizer()
     # take the first character of the PoS tag and get the wordnet coding from the tag_map dictionary, the default value is wordnet.NOUN
     lemmatized_tokens = [lemmatizer.lemmatize(token, tag_map.get(pos[0], wordnet.NOUN)) for token, pos in pos_tags]
     return lemmatized_tokens
 
-def get_co(sentences, representation='dictionary', window_size=3):
+def get_co(sentences, representation='dictionary', window_size=6):
     """
     Calculates co-occurrence representation for a list of sentences. Choose appropriate window-size
     for your relevant needs. The chosen representation can be either 'dictionary' or 'matrix'.
@@ -145,12 +149,21 @@ def get_word_em(token):
     Function that returns word embedding of a token. If the token is a MWE than it 
     returns the average vector of all the tokens in the MWE.
     """
-    model = KeyedVectors.load('data/model.model')
     tokens = token.split("_") # in case we deal with a MWE
     embeddings = []
     for word in tokens:
         if word in model:
             embeddings.append(model[word])
         else:
-            Exception("Word not present in vocabulary!")
+            raise Exception(f"Word {token} not present in vocabulary!")
     return sum(embeddings)/len(embeddings) # returning the average vector
+
+def is_token_in_model(token) -> bool:
+    """
+    Check if given tokens (which can be a MWE) is inside the word-embedding model.
+    """
+    tokens = token.split("_")
+    for word in tokens:
+        if word not in model:
+            return False
+    return True

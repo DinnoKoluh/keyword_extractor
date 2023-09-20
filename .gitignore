@@ -2,6 +2,8 @@
 *__pycache__
 ex1.txt
 TODO.txt
+ex2.txt
+ex2_labels.txt
 *.aux
 *.lof
 *.log
