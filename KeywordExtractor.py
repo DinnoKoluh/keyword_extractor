@@ -1,4 +1,4 @@
-from utils import *
+from nlp_utils import *
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd

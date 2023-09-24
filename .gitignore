@@ -16,3 +16,10 @@ interactive.py
 *.vscode
 *.model
 *.npy
+*.fdb_latexmk
+*.fls
+*Inspec
+CS_papers.csv
+inspec_papers.csv
+links.txt
+data_cleanup.ipynb

@@ -5,7 +5,6 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 import lexicons
 import re
-from gensim.models import Word2Vec
 from itertools import combinations
 import numpy as np
 from gensim.models import Word2Vec, KeyedVectors
@@ -48,14 +47,6 @@ def prune_text(text):
     
     tokens = [token for token in tokens if re.match(r'^[a-zA-Z0-9_-]+$', token)] # removing non-alphanumeric tokens
     return tokens, sentences
-
-def load_abstract(name):
-    """
-    Load text from file based on the filename.
-    """
-    with open('data/' + name + '.txt', 'r') as file:
-        abstract = file.read()
-    return abstract
 
 def join_MWE(tokens):
     """
