@@ -1,9 +1,7 @@
 from nlp_utils import *
 import networkx as nx
 import matplotlib.pyplot as plt
-import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
-import copy
 
 # https://networkx.org/documentation/stable/tutorial.html
 
@@ -15,6 +13,7 @@ class KeywordExtractor:
         self.co = {} # co-occurrence representation as a dictionary, it is initialized in the init_graph method, the edges are represented as tuples
         # and they are the keys of the dictionary while the weights are the values
         self.graph = self.init_graph() # graph structure where the relations between tokens are saved
+        self.added_weights = False # if the embedding weights have already been added to graph
 
     def init_graph(self):
         """
@@ -38,11 +37,14 @@ class KeywordExtractor:
         Reweigh graph by using the word-embeddings of tokens. The new weights are going to be 
         the product of the similarity between two adjacent nodes and the number of co-occurrences
         """
-        # TODO deep copy of graph object
+        if self.added_weights:
+            print(f"Weights already added!")
+            return
         for u, v, data in self.graph.edges(data=True):
             if 'weight' in data:
                 data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0]
         print(f"Added word-embedding weights!")
+        self.added_weights = True
 
     def order_nodes(self, method=""):
         """

@@ -276,8 +276,8 @@
 	
 	\begin{spacing}{1.5}
 	\section*{Abstract}
-	In the era of information overload it became essential to efficiently extract concise, precise and quality information from large texts. One aspect of information extraction is keyword extraction where large texts are represented as sets of tokens and then the most important words i.e. keywords, represent that text. This prospect of keyword extraction is paramount to researchers as they deal with huge numbers of scientific papers, and having a good and concise representation of those papers is essential for them. This thesis paper addresses that problem in the realm of natural language processing (NLP). \\
-	Using core concepts of NLP and modeling texts as graphs, in this paper we are going to build a model for the automatic extraction of keywords. This is done in an unsupervised manner as the importance of a word is calculated through the position and weights associated with respective words in the graph. One of the sources of the word weights are word-embeddings as they became a crucial way of representing words as dense vectors. \\
+	In the era of information overload it became essential to efficiently extract concise, precise and quality information from large texts. One aspect of information extraction is keyword extraction where large texts are represented as sets of tokens i.e. keywords. This prospect of keyword extraction is paramount to researchers as they deal with huge numbers of scientific papers, and having a good and concise representation of those papers is essential for them. This thesis paper addresses that problem in the realm of natural language processing (NLP). \\
+	Using core concepts of NLP and modeling texts as graphs, we are going to build a model for the automatic extraction of keywords. This is done in an unsupervised manner as the importance of a word is calculated through the position and weights associated with respective words in the graph. The first metric used to calculate the graph weights are co-occurrence matrices and the other metric are word embeddings. Word embeddings became a crucial way of representing the semantic information of words as dense vectors. \\
 	The results of this paper were compared with keywords that were provided by authors of scientific papers in the area of computer science which act as the ground truth, but crucially are not a component in the model construction, but just serve as a verifier of the model's accuracy.
 	
 	\textbf{Keywords}: NLP, keyword extraction, scientific papers, graphs, word-embeddings
@@ -302,7 +302,7 @@
 	\pagestyle{fancy}
 	%\thispagestyle{empty}
 	\section{Introduction and Motivation}
-	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of some key concepts like word-embeddings \cite{we} (which we are going to use) and transformers \cite{transformers}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be shifted a bit from Deep Neural Network (DNN) models and more to the traditional Machine Learning (ML) models. \\
+	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of some key concepts like \textit{word-embeddings} \cite{word-embedding-survey} (which we are going to use) and \textit{transformers} \cite{transformers-survey}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be a bit shifted from Deep Neural Network (DNN) models and more to traditional Machine Learning (ML) models. \\
 	NLP has many subfields and application areas such as:
 	\begin{itemize}
 		\item Text classification
@@ -313,9 +313,16 @@
 		\item Conversational agents
 		\item Sentiment analysis
 	\end{itemize} 
-	The field we are going to be working on will be information retrieval, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{PeterTurney}. Scientific papers are usually the area where keyword are most frequently used as researchers use them for a quick overview of the paper and also sorting paper into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions) while keyphrases are a more complicated entity comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
-	The model to be used for keyword extraction is graph-based. The idea is to model words in an abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific [ADJ] paper [N]). Then the question comes how to model the edges of the graph? \\
-	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. So, the idea is to build a sliding window of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information.
+	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. deep learning) while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
+	The model to be used for keyword extraction is \textbf{graph-based}. The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that some preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter. \\
+	As stated, the nodes of the graph will be modeled as words, but the question comes on how to model the edges of the graph? \\
+	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences in when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed ans used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning (whatever that might mean in some general picture) also have similar vector representations and that we can use the usual mathematical tools on these vectors like the dot product which means that we can actually measure the similarity between words. \\
+	We now have the complete representation of the input text as a graph. Now we need to somehow rank the nodes according to the graph edges and weights. We can refer to the ranking procedure as to finding the importance of each node. There are several algorithms which can find the importance of nodes, and we will speak in more detail about them later, but for now can assume we have a black box which takes in the graph representation of the abstract as described before and gives us all the nodes (word) ranked by their importance. \\
+	We now have a list of the most important words, but there is one more step that we can do to get a more robust output. The given output would be a list of words, but we might want to have phrases instead of keywords (e.g. the phrase "scientific paper" is more representative instead of just "paper"). We can use the words we got out from the graph and traverse the initial text for phrases in which they appear. Then based on those phrases in the initial text and the importance of the words which they are made of, we can get alongside the ranked words also the phrases in which they appear. In this way we can also generalize the problem by letting a phrase be only made up of one keyword. If it is made up of more than one keyword we can average it out, and in the end get the ranking of the specific phrases which appear in the input text. \\
+	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts. In the next few chapters we are going to look in more detail in the inner workings of the steps involved. We will start with the NLP preprocessing pipeline.
+	
+	
+	\newpage
 	\section{NLP Pipeline}
 	 
 	\section{Word Embeddings}
@@ -332,48 +339,24 @@
 	\section{Literature}
 	
 	\begin{thebibliography}{8}
-		\bibitem{T-RRT} 
-		Jaillet, Léonard, Juan Cortés, and Thierry Siméon. "\textit{Transition-based RRT for path planning in continuous cost spaces.}" 2008 IEEE/RSJ International Conference on Intelligent Robots and Systems. IEEE, 2008. \\
-		\texttt{URL: }\url{https://hal.laas.fr/hal-01986342/document}
+		\bibitem{word-embedding-survey}
+		Almeida, Felipe, and Geraldo Xexéo. "\textit{Word embeddings: A survey}.", arXiv preprint arXiv:1901.09069 (2019). \\
+		\texttt{URL: }\url{https://arxiv.org/pdf/1901.09069.pdf}
 		
-		\bibitem{RRT}
-		LaValle, Steven M. "\textit{Rapidly-exploring random trees: A new tool for path planning}". Computer Science Department, Iowa State University (TR 98–11), October 1998.\\
-		\texttt{URL: }\url{http://msl.cs.uiuc.edu/~lavalle/papers/Lav98c.pdf}
+		\bibitem{transformers-survey}
+		Lin, Tianyang, et al. "\textit{A survey of transformers}.", AI Open (2022).\\
+		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/pii/S2666651022000146}
 		
-		\bibitem{PRM}
-		Kavraki L. E., Svestka P., Latombe J.C., Overmars M. H. "\textit{Probabilistic roadmaps for path planning in high-dimensional configuration spaces.}". IEEE Transactions on Robotics and Automation, 1996. \\
-		\texttt{URL: }\url{http://dspace.library.uu.nl/handle/1874/17328}
-		
-		\bibitem{BiRRT}
-		Kuffner, James J., and Steven M. LaValle. "\textit{RRT-connect: An efficient approach to single-query path planning.}", Proceedings 2000 ICRA. Millennium Conference. IEEE International Conference on Robotics and Automation. Symposia Proceedings (Cat. No. 00CH37065). Vol. 2. IEEE, 2000. \\
-		\texttt{URL: }\url{http://kuffner.org/james/papers/kuffner_icra2000.pdf}
-		
-		\bibitem{proteinFolding}
-		LaValle, Steven M. "\textit{Planning Algorithms}". Cambridge University Press. ISBN 978-1-139-45517-6, May 2006.
-		
-		\bibitem{siciliano}
-		B. Siciliano, L. Sciavicco, L. Villani, and G. Oriolo. "\textit{Robotics: Modelling, Planning and Control}". Springer, London, UK, 2009.
-		
-		\bibitem{MonteCarlo}
-		Kroese D. P., Brereton T., Taimre T., Botev Z. I. "\textit{Why the Monte Carlo method is so important today}", 2014.
+		\bibitem{keyword-extraction-0}
+		Zu, Xian, Fei Xie, and Xiaojian Liu. "\textit{Graph-based keyphrase extraction using word and document embeddings}.", 2020 IEEE International Conference on Knowledge Graph (ICKG). IEEE, 2020. \\
+		\texttt{URL: }\url{https://ieeexplore.ieee.org/abstract/document/9194571}
 		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, 2017. 
 		
-		\bibitem{convexHullAlgo}
-		Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein. "\textit{Introduction to Algorithms}", Second Edition. MIT Press and McGraw-Hill. ISBN 0-262-03293-7. \textit{Section 33.3: Finding the convex hull}, pp. 947–957, 2001.
-		
-		\bibitem{inhull}
-		John D'Errico (2020). Efficient test for points inside a convex hull in n dimensions. \\ \textsc{Matlab} Central File Exchange. Retrieved December 11, 2020. \\ \texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/10226-inhull}
-		
 		\bibitem{p_poly_line}
 		Michael Yoshpe (2020). Distance from points to polyline or polygon. \\
 		\textsc{Matlab} Central File Exchange. Retrieved December 11, 2020. \\ \texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/12744-distance-from-points-to-polyline-or-polygon}
-		
-		\bibitem{vert2lcon}
-		Matt J. (2020). Analyze N-dimensional Polyhedra in terms of Vertices or (In)Equalities. \\
-		\textsc{Matlab} Central File Exchange. Retrieved December 10, 2020\\
-		\texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/30892-analyze-n-dimensional-polyhedra-in-terms-of-vertices-or-in-equalities}
 		
 		\bibitem{lsqlin}
 		\texttt{lsqlin} function description. Solve constrained linear least-squares problems. \\

@@ -95,7 +95,7 @@ def lemmatize_tokens(tokens) -> [str]:
 def get_co(sentences, representation='dictionary', window_size=6):
     """
     Calculates co-occurrence representation for a list of sentences. Choose appropriate window-size
-    for your relevant needs. The chosen representation can be either 'dictionary' or 'matrix'.
+    for your relevant input. The chosen representation can be either 'dictionary' or 'matrix'.
     """
     unique_tokens = list(set([token for sentence in sentences for token in sentence]))
     n = len(unique_tokens)

@@ -11,7 +11,7 @@ def load_abstract(name):
 
 def get_data(path, version):
     """
-    Load abstracts and keywords from a csv file.
+    Load abstracts and keywords from a csv file. Two datasets are available, CS and inspec.
     """
     if version == "CS":
         df = pd.read_csv(path)
