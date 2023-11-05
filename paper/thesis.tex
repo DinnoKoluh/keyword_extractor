@@ -62,8 +62,8 @@
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{\scriptsize \hspace*{0cm}  Thesis topic: Graph-Based Keyword Extraction from
- \\ Scientific Paper Abstracts using Word Embeddings \\ Author: Dinno Koluh}
-\lhead{\scriptsize Alma Mater Studiorum \\ Universit\`a  di Bologna \\ Department of Computer Science and Engineering}
+ \\ Scientific Paper Abstracts using Word Embeddings}
+\lhead{\scriptsize Universit\`a  di Bologna \\ Department of Computer Science and Engineering}
 \fancyheadoffset{1cm} % to offset the header by some distance 
 
 
@@ -313,10 +313,11 @@
 		\item Conversational agents
 		\item Sentiment analysis
 	\end{itemize} 
-	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. deep learning) while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
-	The model to be used for keyword extraction is \textbf{graph-based}. The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that some preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter. \\
+	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. "deep learning") while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
+	The model to be used for keyword extraction is \textbf{graph-based}. The motivation behind using graphs is that graphs are a well-studied and understood concept and many practical problems can be represented with graphs. There are also a plethora of algorithms which are going to be useful for the case of instance ranking. \\
+	The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that some preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter. \\
 	As stated, the nodes of the graph will be modeled as words, but the question comes on how to model the edges of the graph? \\
-	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences in when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed ans used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning (whatever that might mean in some general picture) also have similar vector representations and that we can use the usual mathematical tools on these vectors like the dot product which means that we can actually measure the similarity between words. \\
+	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed ans used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning (whatever that might mean in some general picture) also have similar vector representations and that we can use the usual mathematical tools on these vectors like the dot product which means that we can actually measure the similarity between words. \\
 	We now have the complete representation of the input text as a graph. Now we need to somehow rank the nodes according to the graph edges and weights. We can refer to the ranking procedure as to finding the importance of each node. There are several algorithms which can find the importance of nodes, and we will speak in more detail about them later, but for now can assume we have a black box which takes in the graph representation of the abstract as described before and gives us all the nodes (word) ranked by their importance. \\
 	We now have a list of the most important words, but there is one more step that we can do to get a more robust output. The given output would be a list of words, but we might want to have phrases instead of keywords (e.g. the phrase "scientific paper" is more representative instead of just "paper"). We can use the words we got out from the graph and traverse the initial text for phrases in which they appear. Then based on those phrases in the initial text and the importance of the words which they are made of, we can get alongside the ranked words also the phrases in which they appear. In this way we can also generalize the problem by letting a phrase be only made up of one keyword. If it is made up of more than one keyword we can average it out, and in the end get the ranking of the specific phrases which appear in the input text. \\
 	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts. In the next few chapters we are going to look in more detail in the inner workings of the steps involved. We will start with the NLP preprocessing pipeline.
@@ -324,7 +325,75 @@
 	
 	\newpage
 	\section{NLP Pipeline}
+	In this chapter we are going to explain the preprocessing steps needed to transform the raw input text into something that can be modeled with a graph. These preprocessing steps are going to be carried out with concepts from NLP like tokenization, sentence splitting, lemmatization, etc. All these NLP concepts used for preprocessing can be stacked into a pipeline hence the name of the chapter, \textbf{NLP pipeline}.\\
+	We will explain these concepts giving examples and at the end show the whole pipeline as a schema. In the end we will have single instances of processed words which are going to be the graph nodes. Let us start!
+	
+	\subsection{Tokenization}
+	Tokenization is the basic and most important NLP concept. Let us firstly define what is a token. A \textbf{token} is a sequence of characters grouped together as a semantic unit used for processing \cite{stanford_NLP}. Depending on the use case,  tokens can be equivalent to words, but they don't have to. An example of words and tokens not being equivalent is:
+	\begin{center}
+		I'd $\rightarrow$ [I, 'd]
+	\end{center}
+	In this case the word "I'd" was broken into two tokens. Depending on the specific tokenization method used, words can be broken into lower units (subwords):
+	\begin{center}
+		unlucky $\rightarrow$ [un, lucky]
+	\end{center}
+	Here, we have that the adjective "unlucky" was broken into its prefix "un" and the adjective "lucky". In this example tokenization provided a way to work with text on a granular level, breaking down words into units which might not even be real words, but in this way we are making text processing tasks more cohesive for machines. \\
+	The process of tokenization would be the process of breaking down an input text into single tokens. As the input text inherently has whitespaces and newlines, those are usually excluded from the obtained tokens. We can look at an example sentence broken down into tokens: 
+	\begin{center}
+		She didn't have time. $\rightarrow$ [She, did, n't, have, time, .]
+	\end{center}
+	When dealing with whitespaces, tokenization is a trivial process, but when dealing with punctuations, tokenization becomes a hard problem. The reason is that sometimes punctuations should be kept, but sometimes they should be separated. In the example above, the token "time." was separated into "time" and ".", but let's take a look at this example:
+	\begin{center}
+		She didn't have time for Mr. Nobody. $\rightarrow$ [She, did, n't, have, time, for, Mr., Nobody, .]
+	\end{center}
+	In this example the period for the token "Mr." was not separated while for "Nobody." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example os ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
+	
+	\subsection{Sentence splitting}
+	Sentence splitting is the process of splitting up a text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using the sliding window we don't want to capture the end of one sentence and beginning of the next one in the same context as they might not carry the same context as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
+	Sentence splitting has inherently similar problems as does tokenization as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. 
+	
+	\subsection{MWE}
+	MWE or Multi-Word Expressions are sequences of words that when grouped together carry a meaning, but when standing alone do not. An example of a MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting the together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning". \\
+	We expect when dealing with scientific papers, that they are going to have many MWE and possibly new, non-existent MWE. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep a MWE lexicon. Another solution, which was found after an inspection of the dataset is that novel MWE usually are written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
+	Let us see an example for MWE tokenization:
+	\begin{center}
+		We are discussing Machine Learning (ML) models in San Francisco. $\rightarrow$ \\
+		
+		[We, are, discussing, Machine Learning, (, ML, ), models, in, San Francisco, .]
+	\end{center} 
+	
+	\subsection{Token removal based on PoS tags}
+	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. is a word a noun, verb, adjective, etc. The question is why do we need this step?\\
+	The reason is the nature of the task we are doing. Namely, keywords are usually a phrase of an adjective and verb or at most a single noun. Taking this into consideration we can substantially reduce the graph size if we just keep nouns and adjective as the possible graph nodes. There are several ways on getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
+	We are not going into the inner workings of these methods, but just use an existent model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are the same but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
+	\begin{center}
+		Japan[Noun] developed[Verb] into[Prep.] a[Det.] developed[Adj.] nation[Noun].
+	\end{center}
+	This is the reason why context is very important when assigning PoS tags. Deep learning and statistical methods are usually good at these context specific examples but they require quite large training datasets. \\
+	An example of this step can be seen below:
+	\begin{center}
+		Japan developed into a developed nation. $\rightarrow$ [Japan, developed, nation, .]
+	\end{center}	  
+	
+	\subsection{Stopword removal}
+	Stopwords are common words occurring in a language that are usually filtered out during NLP tasks as they do not carry much value for the specific task. For our purposes stopword removal is essential as we are going to have many of them, and in the final ranking they will not be present in the keyphrases. The usual method of stopword removal is to build a stopword lexicon and just remove those words from the input text. An example of stopwords are: "the", "and", "in", etc. Let us see an example for stopword removal on a sentence:
+	\begin{center}
+		The quick brown fox jumped over the lazy dog. $\rightarrow$ [quick, brown, fox, jumped, lazy, dog, .]
+	\end{center} 
+	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as stopword removal is a cheap operation.
+	
+	\subsection{Lemmatization}
+	
+	\subsection{Normalization}
+	
 	 
+	 
+	 
+	 
+	 
+	 
+	 
+	\newpage 
 	\section{Word Embeddings}
 	
 	\section{Graph Construction}
@@ -351,16 +420,13 @@
 		Zu, Xian, Fei Xie, and Xiaojian Liu. "\textit{Graph-based keyphrase extraction using word and document embeddings}.", 2020 IEEE International Conference on Knowledge Graph (ICKG). IEEE, 2020. \\
 		\texttt{URL: }\url{https://ieeexplore.ieee.org/abstract/document/9194571}
 		
+		\bibitem{stanford_NLP}
+		The Stanford NLP Group\\
+		\texttt{URL: }\url{https://nlp.stanford.edu/}
+		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, 2017. 
 		
-		\bibitem{p_poly_line}
-		Michael Yoshpe (2020). Distance from points to polyline or polygon. \\
-		\textsc{Matlab} Central File Exchange. Retrieved December 11, 2020. \\ \texttt{URL: }\url{https://www.mathworks.com/matlabcentral/fileexchange/12744-distance-from-points-to-polyline-or-polygon}
-		
-		\bibitem{lsqlin}
-		\texttt{lsqlin} function description. Solve constrained linear least-squares problems. \\
-		\texttt{URL: }\url{https://www.mathworks.com/help/optim/ug/lsqlin.html}
 	\end{thebibliography}
 
 	\end{spacing}

@@ -12,13 +12,14 @@ from gensim.models import Word2Vec, KeyedVectors
 model = KeyedVectors.load('data/model.model')
 
 #nltk.download("stopwords")
+# openai tokenizer: https://platform.openai.com/tokenizer
 
 def prune_text(text):
     """
     Preprocessing input text.
     """
     mwe_tokenizer = MWETokenizer(lexicons.mwe_list) # custom MWE tokenizer with MWE list input
-    tokens = word_tokenize(text) # standard nltk toknizer
+    tokens = word_tokenize(text) # standard nltk tokenizer
     tokens = join_MWE(tokens) # joining upper-case tokens into MWE
     tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
 
