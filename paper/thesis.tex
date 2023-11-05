@@ -30,7 +30,6 @@
 \usepackage{array} %za tabele
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 
-
 \usepackage{enumitem}
 
 \usepackage{caption}
@@ -41,7 +40,7 @@
 \usepackage{setspace}
 
 \usepackage[obeyspaces]{url} % for adding paths to a folder
-\graphicspath{{./Figures/}}
+\graphicspath{{./figures/}}
 
 %\path{{./Data/}} % adddig a path to a folder
 
@@ -266,7 +265,7 @@
 			
 			\vspace{2cm} 
 			{\large Bologna,}\\[0.1cm] 
-			{\large October 2023.}
+			{\large December 2023.}
 			
 		\end{center}
 	\end{titlepage}
@@ -383,8 +382,31 @@
 	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as stopword removal is a cheap operation.
 	
 	\subsection{Lemmatization}
+	Lemmatization is an NLP technique to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to strip the words to their root form. Some examples of lemmatization is show below:
+	\begin{center}
+		am, are, is $\rightarrow$ be \\
+		horses, horse, horses', horse's $\rightarrow$ horse \\
+		develops, developed, developing $\rightarrow$ develop
+	\end{center}
+	For lemmatization to be accurate, it usually uses PoS as context is important to determine the grammatical role of a word in a sentence. This step is important as the lemma of a word may vary depending on its PoS. Lemmatization will usually transform verbs, adjectives and adverbs to their base form, but if a noun is present among a set of words (e.g. "developer" in the last example) it will keep the noun how it is as nouns are usually lemmas themselves (but it will of course strip possessive or plural forms). With the use of PoS tags and grammatical rules and dictionaries, words are mapped to their lemmas. \\
+	One similar concept to lemmatization is stemming, where in the stemming process words are stripped from their suffixes and prefixes using a predefined set of rules. The problem with stemming is that it might produce non-existent words (e.g. "replacement" $\rightarrow$ "replac") which is not practical for our purposes. \\
+	The reason we need lemmatization is that words that might have different forms have to be treated as the same word as in the other case we would have two different nodes in the graph that actually represent the same word. Let us see an example of this:
+	\begin{center}
+		Graph models were used for modeling words. $\rightarrow$ Graph model be use for model word.	
+	\end{center}
 	
 	\subsection{Normalization}
+	
+	\begin{figure}[H]
+		\centering
+		%\hspace*{-0.8cm}
+		\includegraphics[scale=0.75]{NLP_pipeline}		
+		%\captionsetup{justification=centering}
+		\caption{The NLP pipeline}
+		\label{link_table}
+	\end{figure}
+	
+
 	
 	 
 	 
@@ -401,6 +423,8 @@
 	\section{Implementation of Keyword Extraction}
 	
 	\section{Testing, Results and Discussion}
+	
+	\subsection{Dataset}
 	
 	\section{Conclusion}
 	

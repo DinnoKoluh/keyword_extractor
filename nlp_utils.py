@@ -13,6 +13,7 @@ model = KeyedVectors.load('data/model.model')
 
 #nltk.download("stopwords")
 # openai tokenizer: https://platform.openai.com/tokenizer
+# lemmatizer: https://cst.dk/tools/index.php#output
 
 def prune_text(text):
     """
