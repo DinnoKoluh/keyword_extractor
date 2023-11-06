@@ -328,7 +328,7 @@
 	We will explain these concepts giving examples and at the end show the whole pipeline as a schema. In the end we will have single instances of processed words which are going to be the graph nodes. Let us start!
 	
 	\subsection{Tokenization}
-	Tokenization is the basic and most important NLP concept. Let us firstly define what is a token. A \textbf{token} is a sequence of characters grouped together as a semantic unit used for processing \cite{stanford_NLP}. Depending on the use case,  tokens can be equivalent to words, but they don't have to. An example of words and tokens not being equivalent is:
+	Tokenization is the basic and most important NLP concept. Let us firstly define what a token is. A \textbf{token} is a sequence of characters grouped together as a semantic unit used for text processing \cite{stanford_NLP}. Depending on the use case,  tokens can be equivalent to words, but they don't have to. They can even be single characters but that depends on the tokenizer model used. An example of words and tokens not being equivalent is:
 	\begin{center}
 		I'd $\rightarrow$ [I, 'd]
 	\end{center}
@@ -337,7 +337,7 @@
 		unlucky $\rightarrow$ [un, lucky]
 	\end{center}
 	Here, we have that the adjective "unlucky" was broken into its prefix "un" and the adjective "lucky". In this example tokenization provided a way to work with text on a granular level, breaking down words into units which might not even be real words, but in this way we are making text processing tasks more cohesive for machines. \\
-	The process of tokenization would be the process of breaking down an input text into single tokens. As the input text inherently has whitespaces and newlines, those are usually excluded from the obtained tokens. We can look at an example sentence broken down into tokens: 
+	The process of \textbf{tokenization} would be the process of breaking down an input text into single tokens. As the input text inherently has whitespaces and newlines, those are usually excluded from the obtained tokens. We can look at an example sentence broken down into tokens: 
 	\begin{center}
 		She didn't have time. $\rightarrow$ [She, did, n't, have, time, .]
 	\end{center}
@@ -345,15 +345,15 @@
 	\begin{center}
 		She didn't have time for Mr. Nobody. $\rightarrow$ [She, did, n't, have, time, for, Mr., Nobody, .]
 	\end{center}
-	In this example the period for the token "Mr." was not separated while for "Nobody." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example os ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
+	In this example the period for the token "Mr." was not separated while for "Nobody." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example of ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
 	
 	\subsection{Sentence splitting}
-	Sentence splitting is the process of splitting up a text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using the sliding window we don't want to capture the end of one sentence and beginning of the next one in the same context as they might not carry the same context as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
-	Sentence splitting has inherently similar problems as does tokenization as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. 
+	Sentence splitting is the process of splitting up text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using the sliding window we don't want to capture the end of one sentence and the beginning of the next one in the same context as they might not carry the same meaning as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
+	Sentence splitting has inherently similar problems as tokenization does as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. Apart from punctuation signs, sentences in quotation marks inside sentence cause problems as such sentences are basically nested sentences. But for our purposes we don't expect to have many such examples in scientific paper abstracts.
 	
 	\subsection{MWE}
-	MWE or Multi-Word Expressions are sequences of words that when grouped together carry a meaning, but when standing alone do not. An example of a MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting the together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning". \\
-	We expect when dealing with scientific papers, that they are going to have many MWE and possibly new, non-existent MWE. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep a MWE lexicon. Another solution, which was found after an inspection of the dataset is that novel MWE usually are written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
+	MWE or Multi-Word Expressions are sequences of words that when grouped together carry one meaning, but when standing alone carry another. An example of an MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting them together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning". \\
+	When dealing with scientific papers, we expect that they are going to have many MWEs and possibly new, non-existent MWEs. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep an MWE lexicon. Another solution, which was observed while inspecting the dataset is that novel MWEs are usually written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
 	Let us see an example for MWE tokenization:
 	\begin{center}
 		We are discussing Machine Learning (ML) models in San Francisco. $\rightarrow$ \\
@@ -362,9 +362,9 @@
 	\end{center} 
 	
 	\subsection{Token removal based on PoS tags}
-	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. is a word a noun, verb, adjective, etc. The question is why do we need this step?\\
+	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. telling if a word is a noun, verb, adjective, etc. The question is why do we need this step?\\
 	The reason is the nature of the task we are doing. Namely, keywords are usually a phrase of an adjective and verb or at most a single noun. Taking this into consideration we can substantially reduce the graph size if we just keep nouns and adjective as the possible graph nodes. There are several ways on getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
-	We are not going into the inner workings of these methods, but just use an existent model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are the same but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
+	We are not going into the inner workings of these methods, but we will just use an existing model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are \textit{homographs} (they are spelled the same but have a different meaning) but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
 	\begin{center}
 		Japan[Noun] developed[Verb] into[Prep.] a[Det.] developed[Adj.] nation[Noun].
 	\end{center}
@@ -382,7 +382,7 @@
 	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as stopword removal is a cheap operation.
 	
 	\subsection{Lemmatization}
-	Lemmatization is an NLP technique to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to strip the words to their root form. Some examples of lemmatization is show below:
+	Lemmatization is an NLP technique used to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to transfer those words to their root form. Some examples of lemmatization is show below:
 	\begin{center}
 		am, are, is $\rightarrow$ be \\
 		horses, horse, horses', horse's $\rightarrow$ horse \\
@@ -396,27 +396,34 @@
 	\end{center}
 	
 	\subsection{Normalization}
+	Normalization is the process of putting words with different forms into a single normalized form. A good example of this step is the lowercasing of all words in a sentence, otherwise we will have words which are the same but they are essentially represented as two different words. We could also look at lemmatization and stemming as parts of normalization as they also map words with different forms into a single one, but we will keep them as two separate steps. \\
+	One essential normalization step will be normalizing MWE expressions into single forms. We can look at the example below:
+	\begin{center}
+		U.S.A., US, United States, United States of America, USA $\rightarrow$ USA
+	\end{center}
+	All of the words on the left essentially mean the same thing, so we can represent it by one word. We will encounter a great deal of MWE expressions in scientific papers that use acronyms and their long forms, so it is necessary to represent them as a single word. \\ 
+	In the normalization process we will also include the removal of punctuation signs and other non-alphanumeric sign (e.g. \#, (, ), ?), and the expansion of clitics into their expanded form (e.g. I'd $\rightarrow$ I would).
 	
+	\subsection{The pipeline}
+	Let us now combine all the steps of the NLP preprocessing pipeline into a single schema for better readability.
 	\begin{figure}[H]
 		\centering
-		%\hspace*{-0.8cm}
-		\includegraphics[scale=0.75]{NLP_pipeline}		
+		\hspace*{-1.0cm}
+		\includegraphics[scale=0.85]{NLP_pipeline}		
 		%\captionsetup{justification=centering}
 		\caption{The NLP pipeline}
 		\label{link_table}
 	\end{figure}
-	
+	Let us just address briefly some possible points in the figure. Since sentence splitting produces sentences from an input text, the three arrows represent multiple sentences going into the tokenization block. As already said, it is important to know the sentence boundaries when computing the co-occurrence matrix. \\
+	The tokenization block takes as an input the MWE block since it uses the MWE lexicon and other MWE specific features that we mentioned (e.g. abbreviations after the MWE) to correctly tokenize the input. \\
+	And the last point to mention is the lemmatization block which takes in two inputs, the flow of tokens from the previous block and, to function properly, it also needs the PoS tags from the token removal block. \\
+	This figure will be expanded once we talk about other steps required to build the whole model. 
 
 	
-	 
-	 
-	 
-	 
-	 
-	 
-	 
 	\newpage 
 	\section{Word Embeddings}
+	
+	
 	
 	\section{Graph Construction}
 	
