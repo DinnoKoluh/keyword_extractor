@@ -405,14 +405,14 @@
 	In the normalization process we will also include the removal of punctuation signs and other non-alphanumeric sign (e.g. \#, (, ), ?), and the expansion of clitics into their expanded form (e.g. I'd $\rightarrow$ I would).
 	
 	\subsection{The pipeline}
-	Let us now combine all the steps of the NLP preprocessing pipeline into a single schema for better readability.
+	Let us now combine all the steps of the NLP preprocessing pipeline into a single schema in Figure \ref{NLP_pipeline_label} for better readability.
 	\begin{figure}[H]
 		\centering
 		\hspace*{-1.0cm}
 		\includegraphics[scale=0.85]{NLP_pipeline}		
 		%\captionsetup{justification=centering}
 		\caption{The NLP pipeline}
-		\label{link_table}
+		\label{NLP_pipeline_label}
 	\end{figure}
 	Let us just address briefly some possible points in the figure. Since sentence splitting produces sentences from an input text, the three arrows represent multiple sentences going into the tokenization block. As already said, it is important to know the sentence boundaries when computing the co-occurrence matrix. \\
 	The tokenization block takes as an input the MWE block since it uses the MWE lexicon and other MWE specific features that we mentioned (e.g. abbreviations after the MWE) to correctly tokenize the input. \\
@@ -422,11 +422,30 @@
 	
 	\newpage 
 	\section{Word Embeddings}
+	The big challenge of any text processing on a computer is how to represent words as numbers? This is a fundamental question in NLP as computers inherently work with numbers and NLP works with words. In contrast to other areas of computer science like image processing and audio processing whose working medium (images and waveforms) can be and are represented with numbers, there is no apparent way on how to represent the working medium of NLP (words) as numbers. \\
+	
+	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot represent the meaning of a word. The idea is to somehow represent the features of words. For example features of "orange" are that it is a fruit, round, orange colored, etc. In contrast a "banana" is also a fruit, it is curved and yellow. So in that sense, we could encode the features of words as number, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those feature of words as \textit{feature vectors} and this is the point where we come to word embeddings. \\
+	
+	\textbf{Word embeddings} are representation of words as dense real-valued vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process. Let us look at an example $2$D subspace of a larger high-dimensional space on how some words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
+	\begin{figure}[H]
+		\centering
+		\hspace*{-1.0cm}
+		\includegraphics[scale=0.75]{subspace}		
+		%\captionsetup{justification=centering}
+		\caption{Word embeddings in the Gender-Age subspace}
+		\label{subspace_label}
+	\end{figure}
+	  
+	
+	Clusters \\
+	Vector operations \\
 	
 	
-	
+	\newpage
 	\section{Graph Construction}
+	\subsection{Co-occurrence matrix}
 	
+	\newpage
 	\section{Implementation of Keyword Extraction}
 	
 	\section{Testing, Results and Discussion}
