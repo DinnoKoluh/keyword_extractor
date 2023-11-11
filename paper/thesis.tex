@@ -425,9 +425,9 @@
 	\subsection{How to Represent Words as Numbers?}
 	The big challenge of any text processing on a computer is how to represent words as numbers? This is a fundamental question in NLP as computers inherently work with numbers and NLP works with words. In contrast to other areas of computer science like image processing and audio processing whose working medium (images and waveforms) can be and are represented with numbers, there is no apparent way on how to represent the working medium of NLP (words) as numbers. \\
 	
-	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot represent the meaning of a word. The idea is to somehow represent the features of words. For example features of "orange" are that it is a fruit, round, orange colored, etc. In contrast a "banana" is also a fruit, it is curved and yellow. So in that sense, we could encode the features of words as number, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those feature of words as \textit{feature vectors} and this is the point where we come to word embeddings. \\
+	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot meaningfully represent the essence of a word among thousands of other words. The idea is to somehow represent the features of words. For example features of "orange" are that it is a fruit, round, orange colored, etc. In contrast a "banana" is also a fruit but it is curved and yellow. So in that sense, we could encode the features of words as numbers, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those word features as \textit{feature vectors} and this is the point where we come to word embeddings. \\
 	
-	\textbf{Word embeddings} are representation of words as dense real-valued vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process and store. Let us look at an example $2$D subspace of a larger, high-dimensional space on how some words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
+	\textbf{Word embeddings} are representations of words as real-valued dense vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process and store. Let us look at an example of a $2$D subspace of a larger, high-dimensional space. We can see how words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
 	\begin{figure}[H]
 		\centering
 		\hspace*{-1.0cm}
@@ -438,18 +438,19 @@
 	\end{figure}
 	
 	The numbers on the Gender and Age axes are just for presentation purpose as word embeddings are usually real-valued which means they are also continuous. The reason for such a representation instead of an integer or one-hot representation is that continuous and dense vectors capture more accurate and subtle semantic relations between words. The other reason is that real-valued embeddings are more efficient for computation than other sparse representations. The vector elements are also usually in the range $[-1, 1]$ for normalization purposes when using them in neural networks. \\
-	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as male (grandfather, man, boy), the higher values are regarded as female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of person the words have higher or lower values. Here we see the power of embeddings, vector representations of words do really carry meaning with them. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$, dimensions have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
+	
+	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as more male (grandfather, man, boy), the higher values are regarded as more female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of person the words have higher or lower values. We can see the power of embeddings, as the vector representation of a word does really carry meaning in such a space. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$ dimensions, will have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
 	\begin{figure}[H]
 		\centering
 
-		\includegraphics[scale=0.30]{clusters}		
+		\includegraphics[scale=0.50]{clusters}		
 		%\captionsetup{justification=centering}
 		\caption{Clusters of words using word embeddings}
 		\label{cluster}
 	\end{figure}
 % https://towardsdatascience.com/google-news-and-leo-tolstoy-visualizing-word2vec-word-embeddings-with-t-sne-11558d8bd4d
 	
-	The real power of these vectors is that we can perform standard vector operations on them, like the addition and the dot product. This enables us the numerically measure the similarity between word with the cosine similarity like:
+	The real power of these vectors is that we can perform standard vector operations on them, like the addition and the cosine similarity. This enables us to numerically measure the similarity between words with the cosine similarity like:
 	\begin{equation}\label{cosine_similarity}
 		S_C(A, B) = \frac{\mathbf{A}\cdot \mathbf{B}}{\|\mathbf{A}\| \| \mathbf{B}\|}
 	\end{equation}
@@ -458,22 +459,28 @@
 	$$ S_C(\text{grandfather}, \text{girl}) = \frac{(1, 9) \cdot (9, 2)}{\|(1, 9)\| \|(9, 2)\|} = 0.32 $$ 
 	We observe the expected, that "grandfather" and "man" are more similar (both male and older) than "grandfather" and "girl" (different genders and ages). The other operation we mentioned was vector addition. Adding and subtracting word embeddings means that we basically add and subtract the features associated with words. Let us show that on an example (where WE means the word embedding of a word):
 	$$ \text{WE}(\text{woman}) - \text{WE}(\text{man}) + \text{WE}(\text{boy}) = (9, 7) - (1,7) + (1, 2) = (9, 2) = \text{WE}(\text{girl})$$
-	The intuition behind the addition and subtraction for this example is that we subtracted age from "woman" with the age of "man" (which gives $0$ age), and gender from "boy" with the gender of "man" (which gives $0$ gender) and added the age from "boy" and gender from "woman" which give us something that has an age of a boy and the gender of a woman. That something is a girl, which is exactly what we got. Doing this in higher dimensions we can get the closest cluster to the resulting vector and get all the words which are similar to the desired output.
+	The intuition behind the addition and subtraction for this example is that we subtracted the age from "woman" with the age of "man" (which gives $0$ age), and gender from "boy" with the gender of "man" (which gives $0$ gender) and added the age from "boy" and gender from "woman" which gives us something that has the age of a boy and the gender of a woman. That something is a girl, which is exactly what we got. Doing this in higher dimensions we can get the closest cluster to the resulting vector and get a set of words which are similar to the desired output.
 	
-	\subsection{How are Word Embeddings Calculated?}
-	We have seen what word embeddings are, their functionalities and how to use them, but how do we actually get them, in an automated way? \\
-	To core concept of obtaining word embeddings is that similar words occur in the same context. This means that words that are close together in a text also tend to be similar to each other. This is a strong assumption but it has been proven to be viable. The most successful models for calculating word embeddings are neural network based using the context assumption. The idea is to use a \textbf{skip-gram} model, which takes a target word and tries to predict the surrounding context words. We use a sliding window for the size of the context. Then the target word is used as the input to the neural network (actually the one hot encoded sliding window) and the context words are predicted as the output (which we know). The network is then trained to minimize the difference between the predicted and actual context words. The network weights are adjusted during the training to improve the accuracy of the predictions using the backpropagation algorithm. The resulting weights of the hidden layer are used as the word embeddings as they capture the semantic relationships between words. This skip-gram architecture is used in Google's \textbf{word2vec} word embeddings toolkit \cite{word2vec}. \\
+	\subsection{How are Word Embeddings Computed?}
+	We have seen what word embeddings are, their functionalities and how to use them, but how do we actually compute them, in an automated way? \\
+	
+	To core concept of obtaining word embeddings is that similar words occur in the same context. This means that words that are close together in a text also tend to be similar to each other. This is a strong hypothesis but it has been proven to be viable. The most successful models for calculating word embeddings are neural network based using the context assumption. The neural networks are usually shallow as the network weights are used as the embeddings. The idea is to use a \textbf{skip-gram} model, which takes a target word and tries to predict the surrounding context words. A sliding window is used for the size of the context. Then the target word is used as the input to the neural network (actually the one hot encoded sliding window) and the preceding and succeeding words in the context are predicted as the output (which we know). The network is then trained to minimize the difference between the predicted word and actual word in the context. The network weights are adjusted during the training to improve the accuracy of the predictions using the backpropagation algorithm. The resulting weights of the hidden layer are used as the word embeddings as they capture the semantic relationships between words. This skip-gram architecture is used in Google's \textbf{word2vec} word embeddings toolkit \cite{word2vec} developed in $2013$. \\
 	% https://medium.com/@corymaklin/word2vec-skip-gram-904775613b4c
-	The other way of getting the embeddings is using global statistical information of the entire corpus constructing a co-occurrence matrix. That matrix represents the frequency of word pairs occurring together in a given context window. This is exactly the way we will get the pair-wise connections of nodes in the graph we will build. The obtained matrix is then factorized to the final embeddings (the process has some more details but we won't go into detail). This co-occurrence matrix architecture is used in the \textbf{GloVe} model \cite{glove}. 
+	% https://www.turing.com/kb/guide-on-word-embeddings-in-nlp
 	
+	The other way of getting the embeddings is using global statistical information of the entire corpus constructing a co-occurrence matrix. That matrix represents the frequency of word pairs occurring together in a given context window. This is exactly the way we will get the pair-wise connections of nodes in the graph we will build. The obtained matrix is then factorized to the final embeddings (the process has some more details but we won't go into detail). This co-occurrence matrix architecture is used in the \textbf{GloVe} model \cite{glove}. \\
 	
-	Word embedding calculation and storage (as dictionary)
+	When the word embeddings are obtained, they are usually saved in a data object similar to a dictionary where the key is the word and the value is the word embedding. This is an efficient way of getting the embedding values for a specified word. One can train their own model on their own data, but there are many pre-trained models, and the embeddings can be used directly.\\
 	
-	From words to phrases and beyond
+	Some apparent problems using word embeddings as they were described are:
+	\begin{enumerate}
+		\item How to embed phrases (or MWE)?\\
+		When training the network on target words, we can define \textit{target phrases} instead of words. There is actually a model called phrase2vec exclusively build for phrase embedding. There are also models which can embed sentences as vectors, so we can treat sentences as phrases.
+		\item How to deal with homonymy (words with different meaning but written the same)? \\
+		To overcome this problem, \textit{multi-sense} embeddings can be used, where a word can be mapped to more embeddings considering a word's context \cite{multi_sense_we}. 
+	\end{enumerate}
 	
-	Homonymy with word embeddings
-	
-	How we are going to use them
+	Let us also explain how are we going to use word embeddings in the graph model. Once the graph is built, with words as nodes and the edges as connections between the words (gotten from the co-occurrence matrix which will be explained in the next chapter), we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
 	
 	\newpage
 	\section{Graph Construction}
@@ -515,6 +522,10 @@
 		\bibitem{glove}
 		GloVe: Global Vectors for Word Representation\\
 		\texttt{URL: }\url{https://nlp.stanford.edu/projects/glove/}
+		
+		\bibitem{multi_sense_we}
+		Ruas, T., Grosky, W. and Aizawa, A.,  \textit{Multi-sense embeddings through a word sense disambiguation process.}, 2019. Expert Systems with Applications. \\
+		\texttt{URL: }\url{https://arxiv.org/pdf/2101.08700.pdf}
 		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, 2017. 
