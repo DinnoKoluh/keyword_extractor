@@ -21,7 +21,7 @@ def prune_text(text):
     """
     mwe_tokenizer = MWETokenizer(lexicons.mwe_list) # custom MWE tokenizer with MWE list input
     tokens = word_tokenize(text) # standard nltk tokenizer
-    tokens = join_MWE(tokens) # joining upper-case tokens into MWE
+    # tokens = join_MWE(tokens) # joining upper-case tokens into MWE
     tokens = mwe_tokenizer.tokenize(tokens) # tokenizing text
 
     #pos_tags = nltk.pos_tag(tokens) # PoS tagging (nouns and adjectives)
@@ -94,7 +94,7 @@ def lemmatize_tokens(tokens) -> [str]:
     lemmatized_tokens = [lemmatizer.lemmatize(token, tag_map.get(pos[0], wordnet.NOUN)) for token, pos in pos_tags]
     return lemmatized_tokens
 
-def get_co(sentences, representation='dictionary', window_size=6):
+def get_co(sentences, representation='dictionary', window_size=3):
     """
     Calculates co-occurrence representation for a list of sentences. Choose appropriate window-size
     for your relevant input. The chosen representation can be either 'dictionary' or 'matrix'.
