@@ -490,7 +490,7 @@
 		\mathcal{G} = (\mathcal{V},\mathcal{E})
 	\end{equation}
 	where $\mathcal{V}$ is the set of nodes and $\mathcal{E}$ is the set of edges, the links between adjacent nodes \cite{juricGrafovi}. We will model the text to be analyzed as a graph. The set of nodes are going to be the tokenized words. The harder question is what are going to be the edges?
-	Well, we need to somehow encode the links between words. We are going to use the same hypothesis word embeddings use, that words that occur in similar context tend to have similar meanings. If words occur in the same context, we will link them with an edge, and in such a way we will encode the links between words. An important note is that the graph is going to be \textit{undirected} which means that the edges are bidirectional. In this way we are not preserving the word order, as we will not need it, but for some other tasks it could be useful to have it.
+	Well, we need to somehow encode the links between words. We are going to use the same hypothesis word embeddings use, that words that occur in similar context tend to have similar meanings. If words occur in the same context, we will link them with an edge, and in such a way we will encode the links between words. An important note is that the graph is going to be \textit{undirected} which means that the edges are bidirectional i.e. they don't have an orientation. In this way we are not preserving the word order, as we will not need it, but for some other tasks it could be useful to have it.
 	
 	There are different data structure representations of graphs, e.g. as an \textit{adjacency list}, \textit{adjacency matrix}, etc. In the Figure \ref{graph_adjacency} we can see a graphical and matrix representation of a weighted graph. Each entry in the matrix corresponds to an edge between two nodes and its respective weight (weight of $0$ means the nodes are not connected).
 	
@@ -513,8 +513,9 @@
 	\end{figure}
 
 	We are going to use an adjacency matrix representation as it is a good way to translate between graphs and text. This is especially true as we will express the \textit{distributional hypothesis} as a co-occurrence matrix which we will explain in the next subsection. 
+	
 	\subsection{Co-occurrence matrix}
-
+	
 
 	\newpage
 	\section{Implementation of Keyword Extraction}
