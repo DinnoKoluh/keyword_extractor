@@ -68,4 +68,5 @@ class KeywordExtractor:
         # pos = nx.random_layout(self.graph)
         nx.draw(self.graph, pos, with_labels=True, node_size=2000, node_color='lightblue', font_size=10, font_weight='bold')
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=labels, font_size=10, font_weight='bold')
+        #plt.savefig('paper/figures/graph_example.svg', format='svg')
         plt.show()

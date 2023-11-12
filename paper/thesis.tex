@@ -415,9 +415,13 @@
 		\caption{The NLP pipeline}
 		\label{NLP_pipeline_label}
 	\end{figure}
-	Let us just address briefly some possible points in the figure. Since sentence splitting produces sentences from an input text, the three arrows represent multiple sentences going into the tokenization block. As already said, it is important to know the sentence boundaries when computing the co-occurrence matrix. \\
-	The tokenization block takes as an input the MWE block since it uses the MWE lexicon and other MWE specific features that we mentioned (e.g. abbreviations after the MWE) to correctly tokenize the input. \\
-	And the last point to mention is the lemmatization block which takes in two inputs, the flow of tokens from the previous block and, to function properly, it also needs the PoS tags from the token removal block. \\
+	Let us just address briefly some possible points in the figure. Since sentence splitting produces sentences from an input text, the three arrows represent multiple sentences going into the tokenization block. As already said, it is important to know the sentence boundaries when computing the co-occurrence matrix.
+	
+	The tokenization block takes as an input the MWE block since it uses the MWE lexicon and other MWE specific features that we mentioned (e.g. abbreviations after the MWE) to correctly tokenize the input.
+	
+	The lemmatization block which takes in two inputs, the flow of tokens from the previous block and, to function properly, it also needs the PoS tags from the token removal block.
+	
+	The last point to mention is that after the normalization block, the output is not a single stream of tokens, but rather a list of lists of tokens, where each list represents one sentence that the sentence splitting block separated.
 	This figure will be expanded once we talk about other steps required to build the whole model. 
 
 	
@@ -455,11 +459,15 @@
 	\begin{equation}\label{cosine_similarity}
 		S_C(A, B) = \frac{\mathbf{A}\cdot \mathbf{B}}{\|\mathbf{A}\| \| \mathbf{B}\|}
 	\end{equation}
-	We can test this on the figure with the similarity between "grandfather" and "man" versus "grandfather" and "girl"
+
+	We can test this on the figure with the similarity between "grandfather" and "man" versus "grandfather" and "girl":
+	
 	$$ S_C(\text{grandfather}, \text{man}) = \frac{(1, 9) \cdot (1, 2)}{\|(1, 9)\| \|(1, 2)\|} = 0.94 $$ 
 	$$ S_C(\text{grandfather}, \text{girl}) = \frac{(1, 9) \cdot (9, 2)}{\|(1, 9)\| \|(9, 2)\|} = 0.32 $$ 
+	
 	We observe the expected, that "grandfather" and "man" are more similar (both male and older) than "grandfather" and "girl" (different genders and ages). The other operation we mentioned was vector addition. Adding and subtracting word embeddings means that we basically add and subtract the features associated with words. Let us show that on an example (where WE means the word embedding of a word):
 	$$ \text{WE}(\text{woman}) - \text{WE}(\text{man}) + \text{WE}(\text{boy}) = (9, 7) - (1,7) + (1, 2) = (9, 2) = \text{WE}(\text{girl})$$
+	
 	The intuition behind the addition and subtraction for this example is that we subtracted the age from "woman" with the age of "man" (which gives $0$ age), and gender from "boy" with the gender of "man" (which gives $0$ gender) and added the age from "boy" and gender from "woman" which gives us something that has the age of a boy and the gender of a woman. That something is a girl, which is exactly what we got. Doing this in higher dimensions we can get the closest cluster to the resulting vector and get a set of words which are similar to the desired output.
 	
 	\subsection{How are Word Embeddings Computed?}
@@ -483,14 +491,15 @@
 	
 	Let us also explain how are we going to use word embeddings in the graph model. Once the graph is built, with words as nodes and the edges as connections between the words (gotten from the co-occurrence matrix which will be explained in the next chapter), we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
 	
+	
 	\newpage
 	\section{Graph Construction}
 	In this section we will dive into the construction of the graph model. A graph $\mathcal{G}$ is defined as an ordered pair:
 	\begin{equation}
 		\mathcal{G} = (\mathcal{V},\mathcal{E})
 	\end{equation}
-	where $\mathcal{V}$ is the set of nodes and $\mathcal{E}$ is the set of edges, the links between adjacent nodes \cite{juricGrafovi}. We will model the text to be analyzed as a graph. The set of nodes are going to be the tokenized words. The harder question is what are going to be the edges?
-	Well, we need to somehow encode the links between words. We are going to use the same hypothesis word embeddings use, that words that occur in similar context tend to have similar meanings. If words occur in the same context, we will link them with an edge, and in such a way we will encode the links between words. An important note is that the graph is going to be \textit{undirected} which means that the edges are bidirectional i.e. they don't have an orientation. In this way we are not preserving the word order, as we will not need it, but for some other tasks it could be useful to have it.
+	where $\mathcal{V}$ is the set of nodes and $\mathcal{E}$ is the set of edges, the links between adjacent nodes \cite{juricGrafovi}. We will model the text to be analyzed as a graph. The set of nodes are going to be the tokenized words. The more important question is what are going to be the edges?
+	Well, we need to somehow encode the links (semantic relation) between words. We are going to use the same hypothesis word embeddings use, that words that occur in similar contexts tend to have similar meanings. If words occur in the same context, we will link them with an edge, and in such a way we will encode the links between words. An important note is that the graph is going to be \textit{undirected} which means that the edges are bidirectional i.e. they don't have an orientation. In this way we are not preserving the word order, as we will not need it, but for some other tasks it could be useful to have it.
 	
 	There are different data structure representations of graphs, e.g. as an \textit{adjacency list}, \textit{adjacency matrix}, etc. In the Figure \ref{graph_adjacency} we can see a graphical and matrix representation of a weighted graph. Each entry in the matrix corresponds to an edge between two nodes and its respective weight (weight of $0$ means the nodes are not connected).
 	
@@ -512,15 +521,17 @@
 		\label{graph_adjacency}
 	\end{figure}
 
-	We are going to use an adjacency matrix representation as it is a good way to translate between graphs and text. This is especially true as we will express the \textit{distributional hypothesis} as a co-occurrence matrix which we will explain in the next subsection. 
+	We are going to use an adjacency matrix representation for visualization purposes as it is a good way to translate between graphs and text but in the actual implementation we will use an adjacency list as adjacency matrices are usually sparse. This is especially true as we will express the \textit{distributional hypothesis} as a co-occurrence matrix which we will explain in the next subsection. 
 	
 	\subsection{Co-occurrence matrix}
 	% https://www.baeldung.com/cs/co-occurrence-matrices
-	A \textbf{co-occurrence matrix} in NLP is a matrix that represents the frequency of word co-occurrences within a specified context window for a given text. The idea is to capture how often words appear together in similar contexts. For a given context window size we see how many pair-wise combinations there are. Each row and column of the matrix corresponds to a unique word in the vocabulary (set of unique words in a text) and the matrix elements contain the count of pair-wise word occurrences. 
+	A \textbf{co-occurrence matrix} in NLP is a matrix that represents the frequency of word co-occurrences within a specified context window for a given text. The idea is to capture how often words appear together in similar contexts. For a given context window size we see how many pair-wise combinations there are. Each row and column of the matrix corresponds to a unique word in the vocabulary \footnote{Set of unique words in a corpus also knows as \textit{types}} and the matrix elements contain the count of pair-wise word occurrences. 
 	
-	One thing to address, is that will respect sentence boundaries, so that the context window cannot be across two or more sentences but just one. The reason is that adjacent sentences might not refer to the same context so it is better to analyze them independently. In the Figure \ref{NLP_pipeline_label} the output text is assumed to be a set of tokenized sentences, which means that for each sentence after the sentence splitting module we perform all the steps and get all the tokens per sentence.
+	One thing to address, is that will respect sentence boundaries, so that the context window cannot be present across two or more sentences but just one. The reason is that adjacent sentences might not refer to the same context so it is better to analyze them independently. In Figure \ref{NLP_pipeline_label} the output text is assumed to be a set of tokenized sentences, which means that for each sentence after the sentence splitting module we perform all the steps and get all the tokens per sentence.
 	
 	Let us look at an example set of sentences, for which we are going to perform the NLP pipeline, perform the context window sliding with a window size of $3$ words and show the co-occurrence matrix.
+	
+	We can see in the diagram \ref{co_matrix_construction} that we have an input of three sentences which go through the NLP pipeline and we obtain the tokenized sentences (which went also through all the other steps of the NLP pipeline). The next step is the co-occurrence calculation. The sliding window is visualized as the context words are marked red and the window is sliding until it reaches the end of the sentence after which it goes to the next sentence. The last step is the aggregation of the number of pair-wise co-occurrences into the co-occurrence matrix.
 	
 	
 	\begin{figure}[H]
@@ -532,14 +543,22 @@
 		\label{co_matrix_construction}
 	\end{figure}
 	
-	\textbf{Explain the diagram!!}
+	The last step left to do it to transforms the co-occurrence matrix to a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. One thing to note is that the co-occurrence matrix in the Figure \ref{co_matrix_construction} is sparse, so for memory purposes, we actually store the adjacency matrix as a dictionary (a version of the adjacency list) where the keys are the pair-wise word occurrences and the values are the number of co-occurrences (the graph weights).
+	In Figure \ref{graph_example} we can see the graph representation of the example above.
 	
-	The last step left to do it to transforms the co-occurrence matrix to a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. In Figure \ref{graph_example} we can see the graph representation of the example above.
+	\begin{figure}[H]
+		\vspace{-0.5cm}
+		\centering
+		\includegraphics[scale=0.75]{graph_example}		
+		%\captionsetup{justification=centering}
+		\caption{Graph representation of the co-occurrence matrix}
+		\label{graph_example}
+	\end{figure}
+
+	Just by looking at the graph we can observe that "japan" has the most edge connections. We can also see the semantic relationship between words and their respective strength like (japan, country, $2$), (sushi, fish, $1$), (rice, food, $1$), etc.
 	
-	
-	\textbf{Word embeddings!!}
-	
-	\textbf{Diagram with Cooccrruenece matrix, GRaph, Word embeddsings,}
+	The last step in the graph construction is to encode the word-embedding values in the graph. It is enough to find the cosine-similarity between adjacent nodes and multiply the edge weight with the value of the similarity between words.
+	We can now visualize the whole keyword extraction pipeline.
 	
 	\begin{figure}[H]
 		\centering
@@ -549,13 +568,22 @@
 		\caption{Full pipeline of keyword extraction}
 		\label{full_pipeline}
 	\end{figure}
+	We can see that the last block before obtaining the keywords is the \textit{ranking algorithm}. In the next chapter we will discuss how to rank nodes in a graph based on different graph features, whose output are going to be the keywords.
 	
 	\newpage
 	\section{Implementation of Keyword Extraction from Graphs}
+	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important ones i.e. keyword, based on some metrics.
 	
+	
+	
+	
+	
+	\newpage
 	\section{Testing, Results and Discussion}
+	In this section we will perform tests on a dataset of scientific paper abstracts. We will define the metrics used to evaluate the model and in the end we will see the obtained results and discuss them. Let us firstly look at the dataset used.
 	
 	\subsection{Dataset}
+	
 	\subsection{Evaluation metrics}
 	Slide05 in Turkey's NLP slides.
 	
