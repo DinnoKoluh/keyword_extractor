@@ -65,6 +65,7 @@ class KeywordExtractor:
         #pos = nx.spring_layout(G, seed=1)  # Layout algorithm (you can try different algorithms)
         #pos = nx.shell_layout(G)
         pos = nx.circular_layout(self.graph) # layout of the graph
+        # pos = nx.random_layout(self.graph)
         nx.draw(self.graph, pos, with_labels=True, node_size=2000, node_color='lightblue', font_size=10, font_weight='bold')
         nx.draw_networkx_edge_labels(self.graph, pos, edge_labels=labels, font_size=10, font_weight='bold')
         plt.show()

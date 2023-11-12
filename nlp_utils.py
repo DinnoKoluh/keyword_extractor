@@ -31,8 +31,6 @@ def prune_text(text):
     tokens = lemmatize_tokens(tokens)
     tokens = [token for token in tokens if is_token_in_model(token)]  # remove tokens which are not present in model
 
-
-    # TODO: custom stopwords
     stop_words = set(stopwords.words('english')) # removing stopwords
     tokens = [token for token in tokens if token.lower() not in stop_words]
     # extracting sentences from input text (will be later useful when the sliding window crosses between sentences)
@@ -88,10 +86,11 @@ def lemmatize_tokens(tokens) -> [str]:
     }
 
     pos_tags = nltk.pos_tag(tokens)
-    # TODO filter out verbs
+    # print(f"PoS tags: {pos_tags}")
     lemmatizer = WordNetLemmatizer()
     # take the first character of the PoS tag and get the wordnet coding from the tag_map dictionary, the default value is wordnet.NOUN
-    lemmatized_tokens = [lemmatizer.lemmatize(token, tag_map.get(pos[0], wordnet.NOUN)) for token, pos in pos_tags]
+    lemmatized_tokens = [lemmatizer.lemmatize(token, tag_map.get(pos[0], wordnet.NOUN)) for token, pos in pos_tags if pos[0] in ['N', 'J', '.']]
+    
     return lemmatized_tokens
 
 def get_co(sentences, representation='dictionary', window_size=3):

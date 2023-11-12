@@ -515,14 +515,49 @@
 	We are going to use an adjacency matrix representation as it is a good way to translate between graphs and text. This is especially true as we will express the \textit{distributional hypothesis} as a co-occurrence matrix which we will explain in the next subsection. 
 	
 	\subsection{Co-occurrence matrix}
+	% https://www.baeldung.com/cs/co-occurrence-matrices
+	A \textbf{co-occurrence matrix} in NLP is a matrix that represents the frequency of word co-occurrences within a specified context window for a given text. The idea is to capture how often words appear together in similar contexts. For a given context window size we see how many pair-wise combinations there are. Each row and column of the matrix corresponds to a unique word in the vocabulary (set of unique words in a text) and the matrix elements contain the count of pair-wise word occurrences. 
 	
-
+	One thing to address, is that will respect sentence boundaries, so that the context window cannot be across two or more sentences but just one. The reason is that adjacent sentences might not refer to the same context so it is better to analyze them independently. In the Figure \ref{NLP_pipeline_label} the output text is assumed to be a set of tokenized sentences, which means that for each sentence after the sentence splitting module we perform all the steps and get all the tokens per sentence.
+	
+	Let us look at an example set of sentences, for which we are going to perform the NLP pipeline, perform the context window sliding with a window size of $3$ words and show the co-occurrence matrix.
+	
+	
+	\begin{figure}[H]
+		\vspace{-0.5cm}
+		\centering
+		\includegraphics[scale=0.85]{context_diagram}		
+		%\captionsetup{justification=centering}
+		\caption{Co-occurrence matrix construction}
+		\label{co_matrix_construction}
+	\end{figure}
+	
+	\textbf{Explain the diagram!!}
+	
+	The last step left to do it to transforms the co-occurrence matrix to a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. In Figure \ref{graph_example} we can see the graph representation of the example above.
+	
+	
+	\textbf{Word embeddings!!}
+	
+	\textbf{Diagram with Cooccrruenece matrix, GRaph, Word embeddsings,}
+	
+	\begin{figure}[H]
+		\centering
+		\hspace*{-1cm}
+		\includegraphics[scale=1.0]{full_pipeline}		
+		%\captionsetup{justification=centering}
+		\caption{Full pipeline of keyword extraction}
+		\label{full_pipeline}
+	\end{figure}
+	
 	\newpage
-	\section{Implementation of Keyword Extraction}
+	\section{Implementation of Keyword Extraction from Graphs}
 	
 	\section{Testing, Results and Discussion}
 	
 	\subsection{Dataset}
+	\subsection{Evaluation metrics}
+	Slide05 in Turkey's NLP slides.
 	
 	\section{Conclusion}
 	
