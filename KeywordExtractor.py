@@ -42,19 +42,34 @@ class KeywordExtractor:
             return
         for u, v, data in self.graph.edges(data=True):
             if 'weight' in data:
-                data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0]
+                data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0][0]
+                data['weight'] = np.round(data['weight'], decimals=3)
         print(f"Added word-embedding weights!")
         self.added_weights = True
 
-    def order_nodes(self, method=""):
+    def order_nodes(self, method="degree_centrality"):
         """
         Order the nodes of the graph according to some graph centrality algorithm.
         """
-        #degree_centrality = nx.degree_centrality(self.graph)
-        degree_order = nx.eigenvector_centrality(self.graph)
+        degree_order = None
+        if method=="degree_centrality":
+            degree_order = nx.degree_centrality(self.graph)
+        elif method=="betweenness_centrality":
+            degree_order = nx.betweenness_centrality(self.graph)
+        elif method=="eigenvector_centrality":
+            degree_order = nx.eigenvector_centrality(self.graph)
+        elif method=="pagerank":
+            degree_order = nx.pagerank(nx.Graph(self.graph))
+        elif method=="closeness_centrality":
+            degree_order = nx.closeness_centrality(self.graph)
+        elif method=="katz_centrality":
+            degree_order = nx.katz_centrality(self.graph)
+        else:
+            raise Exception("Wrong method name!")
+        print(f"Method selected: {method}")
         sorted_dict_by_values_desc = dict(sorted(degree_order.items(), key=lambda item: item[1], reverse=True))
         for node, order_value in sorted_dict_by_values_desc.items():
-            print(f"Node {node}:    ---     Node Order = {order_value}")
+            print(f"Node: {node:{20}}   --->    Node Order = {order_value}")
 
     def visualize_graph(self):
         """
