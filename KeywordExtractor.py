@@ -61,9 +61,11 @@ class KeywordExtractor:
         elif method=="pagerank":
             degree_order = nx.pagerank(nx.Graph(self.graph))
         elif method=="closeness_centrality":
-            degree_order = nx.closeness_centrality(self.graph)
+            degree_order = nx.closeness_centrality(self.graph, distance="weight")
         elif method=="katz_centrality":
             degree_order = nx.katz_centrality(self.graph)
+        elif method=="hits":
+            degree_order, _ = nx.hits(self.graph)
         else:
             raise Exception("Wrong method name!")
         print(f"Method selected: {method}")

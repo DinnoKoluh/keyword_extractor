@@ -572,20 +572,35 @@
 	
 	\newpage
 	\section{Implementation of Keyword Extraction from Graphs}
-	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important ones i.e. keyword, based on some metrics.
+	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important nodes i.e. keywords, based on some metrics. There are many different ranking algorithms to rank graph nodes, which take into account node connections, edge number, edge weights, etc. We will take a look at some of them and in the next section we will carry out tests so we can compare how they perform. Let us now explore these ranking algorithms.
+	\subsection{Degree centrality}
+	Degree centrality is a measure that quantifies the importance of nodes in a graph based on the number of edges connected to them. The number of edges connected to a node in a graph is called it's \textit{degree}. The degree of a node can also be thought of as the number of non-zero values in the row or column of the given node in the adjacency matrix. The formula for degree centrality is given as:
+	\begin{equation}
+		C_d(v) = \frac{\deg(v)}{|\mathcal{V}|-1}
+	\end{equation}
+	We divide the node degree by the number of nodes minus $1$ to normalize the degree centrality, so that all the values are in the range $[0, -1]$. In the Figure \ref{graph_example} we can check the degree centralities of a few different nodes like 
+	$$C_d(\text{japan}) = \frac{\deg\text{(japan)}}{|\mathcal{V}|-1} = \frac{6}{13-1} = 0.50$$
+	$$C_d(\text{sea}) = \frac{\deg\text{(sea)}}{|\mathcal{V}|-1} = \frac{3}{13-1} = 0.25$$
+	We can see that the edge weights are not considered in this ranking algorithm. From the standpoint of text, words with high degree centrality would be the ones which are frequently present in the context windows of other words. However this might not capture the full semantic meaning as we are not looking at the weights of the edges. Nevertheless, this algorithm gives us still a simple but effective way to rank words in a text. 	
 	
+	\subsection{Closeness centrality}
+	Closeness centrality is a measure that quantifies how close a node is to other nodes in a graph \cite{bavelas}. This notion of closeness 
 	
-	
-	
+	\subsection{Betweenness centrality}
+	\subsection{Eigenvector centrality}
+	\subsection{PageRank algorithm}
+	\subsection{Katz centrality}
 	
 	\newpage
-	\section{Testing, Results and Discussion}
+	\section{Experiments and Results}
 	In this section we will perform tests on a dataset of scientific paper abstracts. We will define the metrics used to evaluate the model and in the end we will see the obtained results and discuss them. Let us firstly look at the dataset used.
 	
 	\subsection{Dataset}
 	
 	\subsection{Evaluation metrics}
 	Slide05 in Turkey's NLP slides.
+	Macro average , precision, recall
+	\subsection{Testing}
 	
 	\section{Conclusion}
 	
@@ -618,11 +633,15 @@
 		\texttt{URL: }\url{https://nlp.stanford.edu/projects/glove/}
 		
 		\bibitem{multi_sense_we}
-		Ruas, T., Grosky, W. and Aizawa, A.,  \textit{Multi-sense embeddings through a word sense disambiguation process.}, 2019. Expert Systems with Applications. \\
+		Ruas, T., Grosky, W. and Aizawa, A.,  "\textit{Multi-sense embeddings through a word sense disambiguation process.}", 2019. Expert Systems with Applications. \\
 		\texttt{URL: }\url{https://arxiv.org/pdf/2101.08700.pdf}
 		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, 2017. 
+		
+		\bibitem{bavelas}
+		Bavelas, Alex. "\textit{Communication patterns in task‐oriented groups.}", 1950. The journal of the acoustical society of America. \\
+		\texttt{URL: }\url{https://hal.science/hal-03266728/file/bavelas1950groupefmr.pdf}
 		
 	\end{thebibliography}
 

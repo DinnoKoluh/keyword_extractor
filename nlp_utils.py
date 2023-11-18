@@ -33,6 +33,7 @@ def prune_text(text):
 
     stop_words = set(stopwords.words('english')) # removing stopwords
     tokens = [token for token in tokens if token.lower() not in stop_words]
+    tokens = mwe_tokenizer.tokenize(tokens)
     # extracting sentences from input text (will be later useful when the sliding window crosses between sentences)
     sentences = []
     sentence = []
