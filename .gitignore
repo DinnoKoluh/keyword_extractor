@@ -21,6 +21,7 @@ interactive.py
 *Inspec
 CS_papers.csv
 inspec_papers.csv
+rankings.csv
 links.txt
 data_cleanup.ipynb
 *.svg

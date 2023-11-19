@@ -30,10 +30,12 @@ def get_data(path, version):
         return abstracts, keywords 
     
 def make_metrics_csv(ke: KeywordExtractor, methods: dict):
+    """
+    Make csv of the graph with the respective ranking algorithm.
+    """
     df = pd.DataFrame()
     for key in methods.keys():
         rank_dict = ke.order_nodes(methods[key], to_print=False)
         headers = pd.MultiIndex.from_product([[methods[key]], ["Word", "Ranking"]])
         df = pd.concat([df, pd.DataFrame(list(rank_dict.items()), columns=headers)], axis=1)
-    
-    df.to_csv('my_dict.csv', index=False)
+    df.to_csv('rankings.csv', index=False)

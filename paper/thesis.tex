@@ -290,13 +290,13 @@
 	%\renewcommand{\listfigurename}{Figures}
 	\listoffigures
 	\setcounter{page}{0}
-	\pagebreak
+	%\pagebreak
 	
 	%\renewcommand{\listtablename}{Popis tabela}
-%	\listoftables
+	\listoftables
 %	\thispagestyle{empty}
-%	\setcounter{page}{0}
-%	\pagebreak
+    \setcounter{page}{0}
+	\pagebreak
 	
 	\newpage
 	\pagestyle{fancy}
@@ -547,9 +547,8 @@
 	In Figure \ref{graph_example} we can see the graph representation of the example above.
 	
 	\begin{figure}[H]
-		\vspace{-0.5cm}
 		\centering
-		\includegraphics[scale=0.75]{graph_example}		
+		\includegraphics[scale=0.80]{graph_example}		
 		%\captionsetup{justification=centering}
 		\caption{Graph representation of the co-occurrence matrix}
 		\label{graph_example}
@@ -574,7 +573,7 @@
 	\section{Implementation of Keyword Extraction from Graphs}
 	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important nodes i.e. keywords, based on some metrics. There are many different ranking algorithms to rank graph nodes, which take into account node connections, edge number, edge weights, etc. We will take a look at some of them and in the next section we will carry out tests so we can compare how they perform. Let us now explore these ranking algorithms.
 	\subsection{Degree centrality}
-	Degree centrality is a measure that quantifies the importance of nodes in a graph based on the number of edges connected to them. The number of edges connected to a node in a graph is called it's \textit{degree}. The degree of a node can also be thought of as the number of non-zero values in the row or column of the given node in the adjacency matrix. The formula for degree centrality is given as:
+	Degree centrality is a measure that quantifies the importance of nodes in a graph based on the number of edges connected to them \cite{networkx_centrality}. The number of edges connected to a node in a graph is called it's \textit{degree}. The degree of a node can also be thought of as the number of non-zero values in the row or column of the given node in the adjacency matrix. The formula for degree centrality is given as:
 	\begin{equation}
 		C_d(v) = \frac{\deg(v)}{|\mathcal{V}|-1}
 	\end{equation}
@@ -630,9 +629,129 @@
 	And normalizing the results we get $C_B(A) = 1/3$ and $C_B(D) = 1/2$.
 	
 	When it comes to text, words with high betweenness scores act as "bridges" or "connectors" between different parts of text, as they might appear in position which link distinct text concepts. On the other hand, words with low scores may be isolated or play a more local role on a sentence or phrase level rather than a text level.
+	
 	\subsection{Eigenvector centrality}
-	\subsection{PageRank algorithm}
+	Eigenvector centrality is a measure of the importance of a node in a graph, taking into account both its direct connections to other nodes, and the connections of its neighbors. A node has a high eigenvector centrality score if it is connected to other nodes that have a high score. The eigenvector score of a node \textit{i} is defined as the sum of the scores of its neighbors multiplied by the edge weights and scaled by a factor $\lambda$. Let $\mathbf{A}$ be the adjacency matrix of a graph $\mathcal{G}$, where the entry $a_{v,t}$ of $\mathbf{A}$ is the edge weight between nodes $v$ and $t$ then the centrality score $x_v$ of node $v$ is defined as:
+	\begin{equation}\label{eigenvector_1}
+		x_v = \frac{1}{\lambda} \sum_{t \in \mathcal{V}} a_{v,t} x_t
+	\end{equation}
+	doing this for all the nodes in the graph, the equation can be rewritten in matrix notation as:
+	\begin{equation}\label{eigenvector_2}
+		\mathbf{A}\mathbf{x} = \lambda \mathbf{x}
+	\end{equation}
+	which the definition of an eigenvector, hence the name eigenvector centrality. The scaling factor $\lambda$ is the eigenvalue assigned to the eigenvector. The number of eigenvalues for the adjacency matrix $\mathbf{A}$ is going to be the number of nodes $|\mathcal{V}|$, so which one do we choose?
+	
+	The centrality score of the \textit{i}-th node is obtained as the \textit{i}-th component of the eigenvector $\mathbf{x}$ with the highest eigenvalue $\lambda$ (also called the \textit{dominant eigenvector}). This condition of using the dominant eigenvector for the scores comes from the fact that the scores have to be positive. \footnote{By the Perron-Frobenius theorem a real square matrix with positive entries has a unique eigenvalue of largest magnitude and the eigenvalue is real. The corresponding eigenvector can be chosen to have strictly positive components.} The eigenvector is defined up to the eigenvalue $\lambda$, so only the ratios of the centralities of the nodes are well defined. We can go a step further to make sure that the scores are in the range $[0, 1]$ by using the unit vector $\mathbf{x}/||\mathbf{x}||$. Let us demonstrate this ranking algorithm on the graph in Figure \ref{graph_adjacency} where we get that the dominant eigenvector is:
+	$$ \mathbf{x} = 
+	\begin{bmatrix}
+		2.738 & 1.087 & 2.887 & 2.183 & 1
+	\end{bmatrix}^{T}, \text{with eigenvalue of } \lambda = 4.358$$
+	and scaling $\mathbf{x}$ with $||\mathbf{x}||$ we get the scores as:
+	$$ \frac{\mathbf{x}}{||\mathbf{x}||} = \begin{bmatrix}
+		0.574 & 0.228 & 0.605 & 0.457 & 0.209
+	\end{bmatrix}^{T}$$ 
+	We can check if the scores of the neighboring nodes add up as stated in equation \ref{eigenvector_1} for the node $C$ as:
+	$$ x_C = \frac{1}{\lambda} (a_{C,A}x_A + a_{C, D}x_D) = \frac{3 \cdot 0.574 + 2 \cdot 0.457}{4.358} = 0.605 = x_C $$
+	From the graph in Figure \ref{graph_adjacency} we can see that even though the node $C$ is not central it has a high score as it is connected to nodes which have a high score and are central. 
+	
+	The usual way to calculate eigenvalues are using the \textit{characteristic polynomial} as $\det(A-\lambda I) = 0$ but we do not need all the eigenvalues, just the one with the largest magnitude. Taking this into account, in practice when calculating the dominant eigenvector the \textbf{power iteration} algorithm is used. It is an iterative algorithm which returns the eigenvalue $\lambda$ which is the greatest eigenvalue of $A$ in magnitude and the eigenvector $\mathbf{x}$ assigned to it. The iterative recurrence relation is defined as:
+	\begin{equation}
+		\mathbf{b}_{k+1} = \frac{\mathbf{A}\mathbf{b}_{k}}{|| \mathbf{A}\mathbf{b}_{k}||}
+	\end{equation}
+	where $\mathbf{b}_{k}$ is the eigenvector in the \textit{k}-th iteration.
+	The stopping condition can be defined in various ways such as the maximum number of iterations or a threshold in the change of the eigenvector in consecutive iterations.
+	
+	When it comes to text, words with high eigenvector scores have either direct connections to important words or are themselves important words. On the other hand, low scores indicate that the words are less central to the main topic of the text and that they are more local to specific sentences.
+	
+	\subsection{PageRank (TextRank) algorithm}
+	PageRank is a ranking algorithm, originally used by Google's search engine to rank web pages in the search engine results \cite{pagerank}. The internet can be modeled as a graph where the web pages are the nodes and the hyperlinks between them are the edges. This idea can be applied to text as well, where the variation of the algorithm is called \textbf{textrank} \cite{textrank} but we will keep the name PageRank as the ranking algorithm.
+	
+	The basic idea behind the algorithm is the notion of \textit{casting votes}. When one node links to another is casts a vote for the that other node. The higher the number of votes for a node, the higher the importance for that node. The importance of the vote that was casted by the initial node is influenced by the importance of that node itself. For a weighted graph, the vote of node $j$ to node $i$ is scaled by the ratio of the $(i,j)$ edge weight to the sum of all the edge weights of node $j$. In this way only a part of the $j$ node's vote is casted towards node $i$. Casting all the votes toward the node $i$ we get the following recurrence relation for the PageRank (PR) score: 
+	\begin{equation}\label{pagerank1}
+		PR(v_i) = \sum_{v_j \in N(v_i)} \frac{w_{j,i}}{\sum_{v_k \in N(v_j)} w_{j,k}} PR(v_j) 
+	\end{equation}
+	where $N(v_i)$ is the set of all the neighbors of node $i$ and $w_{i,j}$ is the edge weight between nodes $i$ and $j$. The mentioned weight ratio can be obtained from the adjacency matrix if the matrix is converted to a \textit{left stochastic matrix} \footnote{A left stochastic matrix is a square matrix, with each column summing to 1.} One thing to note is that the maximum magnitude of the eigenvalue of a stochastic matrix is $1$ to which the dominant eigenvector is associated.
+	
+	Let us call the left stochastic matrix of the adjacency matrix $\mathbf{P}_\mathbf{A}$ and the vector containing the PageRank values for all the nodes $\mathbf{R}$, then the equation \ref{pagerank1} can be rewritten in matrix notation as:
+	\begin{equation}\label{pagerank2}
+		\mathbf{R} = \mathbf{P}_\mathbf{A} \mathbf{R}
+	\end{equation}
+	which is the same form as the equation \ref{eigenvector_2} where $\lambda = 1$ for \ref{pagerank2} as already said. So, the PageRank algorithm is reduced to the eigenvector centrality. The eigenvector $\mathbf{R}$ is also called the \textit{stationary probability vector} as its values (scores) sum to $1$ and the stationary part means that the vector does not change under the application of the $\mathbf{P}_\mathbf{A}$ matrix. 
+	
+	Let us show the PageRank algorithm on the example from Figure \ref{graph_adjacency} by getting the left stochastic matrix first:
+	$$
+	\mathbf{A} = 
+	\renewcommand\arraystretch{0.8} 
+	\begin{bmatrix}
+			0 & 1 & 3 & 1 & 0 \\
+			1 & 0 & 0 & 0 & 2 \\
+			3 & 0 & 0 & 2 & 0 \\
+			1 & 0 & 2 & 0 & 1 \\
+			0 & 2 & 0 & 1 & 0
+		\end{bmatrix},
+	\mathbf{P}_\mathbf{A} = 
+	\renewcommand\arraystretch{0.8} 
+	\begin{bmatrix}
+		0 & 0.33 & 0.6 & 0.25 & 0 \\
+		0.2 & 0 & 0 & 0 & 0.67 \\
+		0.6 & 0 & 0 & 0.5 & 0 \\
+		0.2 & 0 & 0.4 & 0 & 0.33 \\
+		0 & 0.67 & 0 & 0.25 & 0
+	\end{bmatrix}
+	$$
+	The dominant eigenvector after normalization has the following value: 
+	$$ \mathbf{R} = \begin{bmatrix}
+		0.25 & 0.15 & 0.25 & 0.20 & 0.15
+	\end{bmatrix}^T, \text{with eigenvalue of } \lambda = 1 $$
+	Let us confirm this result by calculating the $PR$ score from equation \ref{pagerank1} for the node $A$:
+	\begin{equation*}
+		\begin{split}
+			PR(A) & = \sum_{v_j \in \{B, C, D\}} \frac{w_{j, A}}{\sum_{v_k \in N(v_j)} w_{j,k}} PR(v_j) \\
+			& = \frac{w_{B,A}}{w_{B,A} + w_{B,E}} PR(B) + \frac{w_{C,A}}{w_{C, A} + w_{C, D}} PR(C) + \frac{w_{D,A}}{w_{D,A} + w_{D, C} + w_{D, E}} PR(D) \\
+			& = \frac{1}{1 + 2}0.15 + \frac{3}{3 + 2}0.25 + \frac{1}{1 + 2 + 1}0.20 \\
+			& = 0.25 = PR(A)
+		\end{split}
+	\end{equation*}
+	When it comes to text, words with high PageRank scores are central concepts and they are likely to be connected to other important words in the text (the same concept as web pages and web search) \cite{textrank}. 
 	\subsection{Katz centrality}
+	Katz
+	
+	g
+	
+	g
+	
+	g
+	
+	g
+	
+	\subsection{Comparing the ranking algorithms}
+	To conclude this section let us apply all the ranking algorithms on the example graph from Figure \ref{graph_example} that models the sentences from Figure \ref{co_matrix_construction} in the form of a table.
+	\begin{table}[H]
+		\caption{Ranking values for the example in Figure \ref{graph_example}.}
+		\scalebox{0.65}{
+		\begin{tabular}{|cc|cc|cc|cc|cc|cc|}
+			\hline
+			\multicolumn{2}{|c|}{Degree centrality}      & \multicolumn{2}{c|}{Closeness Centrality}   & \multicolumn{2}{c|}{Betweenness Centrality} & \multicolumn{2}{c|}{Eigenvector Centrality} & \multicolumn{2}{c|}{Pagerank}                & \multicolumn{2}{c|}{Katz Centrality}        \\ \hline
+			\multicolumn{1}{|c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking \\ \hline
+			\multicolumn{1}{|c|}{japan}         & 0.5     & \multicolumn{1}{c|}{japan}         & 0.462   & \multicolumn{1}{c|}{japan}         & 0.566   & \multicolumn{1}{c|}{japan}         & 0.515   & \multicolumn{1}{c|}{fish}          & 0.148   & \multicolumn{1}{c|}{japan}         & 0.374   \\ \hline
+			\multicolumn{1}{|c|}{fish}          & 0.5     & \multicolumn{1}{c|}{source}        & 0.444   & \multicolumn{1}{c|}{fish}          & 0.505   & \multicolumn{1}{c|}{great}         & 0.431   & \multicolumn{1}{c|}{japan}         & 0.148   & \multicolumn{1}{c|}{fish}          & 0.354   \\ \hline
+			\multicolumn{1}{|c|}{great}         & 0.333   & \multicolumn{1}{c|}{sea}           & 0.444   & \multicolumn{1}{c|}{source}        & 0.227   & \multicolumn{1}{c|}{country}       & 0.33    & \multicolumn{1}{c|}{great}         & 0.111   & \multicolumn{1}{c|}{great}         & 0.327   \\ \hline
+			\multicolumn{1}{|c|}{country}       & 0.25    & \multicolumn{1}{c|}{fish}          & 0.429   & \multicolumn{1}{c|}{sea}           & 0.227   & \multicolumn{1}{c|}{economy}       & 0.309   & \multicolumn{1}{c|}{famous}        & 0.074   & \multicolumn{1}{c|}{country}       & 0.278   \\ \hline
+			\multicolumn{1}{|c|}{famous}        & 0.25    & \multicolumn{1}{c|}{island}        & 0.353   & \multicolumn{1}{c|}{economy}       & 0.129   & \multicolumn{1}{c|}{fish}          & 0.279   & \multicolumn{1}{c|}{rice}          & 0.074   & \multicolumn{1}{c|}{source}        & 0.277   \\ \hline
+			\multicolumn{1}{|c|}{rice}          & 0.25    & \multicolumn{1}{c|}{economy}       & 0.353   & \multicolumn{1}{c|}{food}          & 0.068   & \multicolumn{1}{c|}{source}        & 0.27    & \multicolumn{1}{c|}{source}        & 0.074   & \multicolumn{1}{c|}{sea}           & 0.277   \\ \hline
+			\multicolumn{1}{|c|}{source}        & 0.25    & \multicolumn{1}{c|}{food}          & 0.333   & \multicolumn{1}{c|}{sushi}         & 0.068   & \multicolumn{1}{c|}{sea}           & 0.27    & \multicolumn{1}{c|}{sea}           & 0.074   & \multicolumn{1}{c|}{economy}       & 0.273   \\ \hline
+			\multicolumn{1}{|c|}{sea}           & 0.25    & \multicolumn{1}{c|}{sushi}         & 0.333   & \multicolumn{1}{c|}{island}        & 0.064   & \multicolumn{1}{c|}{island}        & 0.171   & \multicolumn{1}{c|}{country}       & 0.074   & \multicolumn{1}{c|}{famous}        & 0.268   \\ \hline
+			\multicolumn{1}{|c|}{economy}       & 0.25    & \multicolumn{1}{c|}{great}         & 0.3     & \multicolumn{1}{c|}{great}         & 0.03    & \multicolumn{1}{c|}{famous}        & 0.164   & \multicolumn{1}{c|}{economy}       & 0.074   & \multicolumn{1}{c|}{rice}          & 0.268   \\ \hline
+			\multicolumn{1}{|c|}{food}          & 0.167   & \multicolumn{1}{c|}{world\_war\_2} & 0.293   & \multicolumn{1}{c|}{country}       & 0.023   & \multicolumn{1}{c|}{rice}          & 0.164   & \multicolumn{1}{c|}{food}          & 0.037   & \multicolumn{1}{c|}{island}        & 0.214   \\ \hline
+			\multicolumn{1}{|c|}{sushi}         & 0.167   & \multicolumn{1}{c|}{country}       & 0.293   & \multicolumn{1}{c|}{famous}        & 0.015   & \multicolumn{1}{c|}{world\_war\_2} & 0.15    & \multicolumn{1}{c|}{sushi}         & 0.037   & \multicolumn{1}{c|}{food}          & 0.211   \\ \hline
+			\multicolumn{1}{|c|}{island}        & 0.167   & \multicolumn{1}{c|}{famous}        & 0.273   & \multicolumn{1}{c|}{rice}          & 0.015   & \multicolumn{1}{c|}{food}          & 0.09    & \multicolumn{1}{c|}{island}        & 0.037   & \multicolumn{1}{c|}{sushi}         & 0.211   \\ \hline
+			\multicolumn{1}{|c|}{world\_war\_2} & 0.167   & \multicolumn{1}{c|}{rice}          & 0.273   & \multicolumn{1}{c|}{world\_war\_2} & 0.011   & \multicolumn{1}{c|}{sushi}         & 0.09    & \multicolumn{1}{c|}{world\_war\_2} & 0.037   & \multicolumn{1}{c|}{world\_war\_2} & 0.209   \\ \hline
+		\end{tabular}
+	}
+	\end{table}
+	We can see that word rankings are mostly consistent throughout all the algorithms. The words "japan", "fish", "great", "sea" and "country" are the words with the highest ranks and they do really convey the meaning of the example sentences. The words "japan" and "fish" were acting as some kind of connectors between sentences they get high rankings. Other words that happened to be in the same context as those high scoring words have also gotten higher rankings (e.g. "great" and "sea"). 
+	
+	With this overview we can see the potential of modeling text as graphs, especially as the methods are unsupervised and fairly easy to implement. In the next chapter we will test the ranking algorithms on real data and see how they perform.
 	
 	\newpage
 	\section{Experiments and Results}
@@ -653,15 +772,15 @@
 	
 	\begin{thebibliography}{8}
 		\bibitem{word-embedding-survey}
-		Almeida, Felipe, and Geraldo Xexéo. "\textit{Word embeddings: A survey}.", arXiv preprint arXiv:1901.09069 (2019). \\
+		Almeida, Felipe, and Geraldo Xexéo. "\textit{Word embeddings: A survey}". arXiv preprint arXiv:1901.09069 (2019). \\
 		\texttt{URL: }\url{https://arxiv.org/pdf/1901.09069.pdf}
 		
 		\bibitem{transformers-survey}
-		Lin, Tianyang, et al. "\textit{A survey of transformers}.", AI Open (2022).\\
+		Lin, Tianyang, et al. "\textit{A survey of transformers}". AI Open (2022).\\
 		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/pii/S2666651022000146}
 		
 		\bibitem{keyword-extraction-0}
-		Zu, Xian, Fei Xie, and Xiaojian Liu. "\textit{Graph-based keyphrase extraction using word and document embeddings}.", IEEE International Conference on Knowledge Graph (ICKG) (2020). \\
+		Zu, Xian, Fei Xie, and Xiaojian Liu. "\textit{Graph-based keyphrase extraction using word and document embeddings}". IEEE International Conference on Knowledge Graph (ICKG) (2020). \\
 		\texttt{URL: }\url{https://ieeexplore.ieee.org/abstract/document/9194571}
 		
 		\bibitem{stanford_NLP}
@@ -677,19 +796,31 @@
 		\texttt{URL: }\url{https://nlp.stanford.edu/projects/glove/}
 		
 		\bibitem{multi_sense_we}
-		Ruas, T., Grosky, W. and Aizawa, A.,  "\textit{Multi-sense embeddings through a word sense disambiguation process.}" Expert Systems with Applications,  (2019). \\
+		Ruas, T., Grosky, W. and Aizawa, A.  "\textit{Multi-sense embeddings through a word sense disambiguation process}". Expert Systems with Applications,  (2019). \\
 		\texttt{URL: }\url{https://arxiv.org/pdf/2101.08700.pdf}
 		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, (2017). 
 		
+		\bibitem{networkx_centrality}
+		NetworkX Library documentation\\
+		\texttt{URL: }\url{https://networkx.org/documentation/stable/reference/algorithms/}
+		
 		\bibitem{bavelas}
-		Bavelas, Alex. "\textit{Communication patterns in task‐oriented groups.}" The journal of the acoustical society of America (1950). \\
+		Bavelas, Alex. "\textit{Communication patterns in task‐oriented groups}". The journal of the acoustical society of America (1950). \\
 		\texttt{URL: }\url{https://hal.science/hal-03266728/file/bavelas1950groupefmr.pdf}
 		
 		\bibitem{freeman}
-		Freeman, Linton C. "\textit{A set of measures of centrality based on betweenness.}" Sociometry (1977). \\
+		Freeman, Linton C. "\textit{A set of measures of centrality based on betweenness}". Sociometry (1977). \\
 		\texttt{URL: }\url{https://www.jstor.org/stable/3033543?seq=7}
+		
+		\bibitem{pagerank}
+		Brin, Sergey, and Lawrence Page."\textit{The anatomy of a large-scale hypertextual web search engine}". Computer networks and ISDN systems (1998). \\
+		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/abs/pii/S016975529800110X}
+		
+		\bibitem{textrank}
+		Mihalcea, Rada, and Paul Tarau. "\textit{Textrank: Bringing order into text}." Proceedings of the 2004 conference on empirical methods in natural language processing (2004). \\
+		\texttt{URL: }\url{https://aclanthology.org/W04-3252.pdf}
 		
 		
 	\end{thebibliography}

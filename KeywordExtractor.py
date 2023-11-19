@@ -57,23 +57,24 @@ class KeywordExtractor:
         elif method=="betweenness_centrality":
             degree_order = nx.betweenness_centrality(self.graph, weight="weight")
         elif method=="eigenvector_centrality":
-            degree_order = nx.eigenvector_centrality(self.graph)
+            degree_order = nx.eigenvector_centrality(self.graph, weight="weight")
         elif method=="pagerank":
-            degree_order = nx.pagerank(nx.Graph(self.graph))
+            degree_order = nx.pagerank(nx.Graph(self.graph), alpha=1, weight="weight")
         elif method=="closeness_centrality":
             degree_order = nx.closeness_centrality(self.graph, distance="weight")
         elif method=="katz_centrality":
-            degree_order = nx.katz_centrality(self.graph)
+            degree_order = nx.katz_centrality(self.graph, weight="weight")
         elif method=="hits":
             degree_order, _ = nx.hits(self.graph)
         else:
             raise Exception("Wrong method name!")
         print(f"Method selected: {method}")
-        sorted_dict_by_values_desc = dict(sorted(degree_order.items(), key=lambda item: item[1], reverse=True))
+        sorted_dict = dict(sorted(degree_order.items(), key=lambda item: item[1], reverse=True))
         if to_print:
-            for node, order_value in sorted_dict_by_values_desc.items():
+            for node, order_value in sorted_dict.items():
                 print(f"Node: {node:{20}}   --->    Node Order = {order_value}")
-        return sorted_dict_by_values_desc
+        sorted_dict = {key: round(value, 3) for key, value in sorted_dict.items()}
+        return sorted_dict
 
     def visualize_graph(self):
         """
