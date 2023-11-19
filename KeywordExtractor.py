@@ -47,7 +47,7 @@ class KeywordExtractor:
         print(f"Added word-embedding weights!")
         self.added_weights = True
 
-    def order_nodes(self, method="degree_centrality"):
+    def order_nodes(self, method="degree_centrality", to_print=True):
         """
         Order the nodes of the graph according to some graph centrality algorithm.
         """
@@ -55,7 +55,7 @@ class KeywordExtractor:
         if method=="degree_centrality":
             degree_order = nx.degree_centrality(self.graph)
         elif method=="betweenness_centrality":
-            degree_order = nx.betweenness_centrality(self.graph)
+            degree_order = nx.betweenness_centrality(self.graph, weight="weight")
         elif method=="eigenvector_centrality":
             degree_order = nx.eigenvector_centrality(self.graph)
         elif method=="pagerank":
@@ -70,8 +70,10 @@ class KeywordExtractor:
             raise Exception("Wrong method name!")
         print(f"Method selected: {method}")
         sorted_dict_by_values_desc = dict(sorted(degree_order.items(), key=lambda item: item[1], reverse=True))
-        for node, order_value in sorted_dict_by_values_desc.items():
-            print(f"Node: {node:{20}}   --->    Node Order = {order_value}")
+        if to_print:
+            for node, order_value in sorted_dict_by_values_desc.items():
+                print(f"Node: {node:{20}}   --->    Node Order = {order_value}")
+        return sorted_dict_by_values_desc
 
     def visualize_graph(self):
         """

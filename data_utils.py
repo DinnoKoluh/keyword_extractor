@@ -1,5 +1,7 @@
 import pandas as pd
 from ast import literal_eval
+import networkx as nx
+from KeywordExtractor import KeywordExtractor
 
 def load_abstract(name):
     """
@@ -26,3 +28,12 @@ def get_data(path, version):
         keywords = df['keywords'].apply(lambda x: literal_eval(x))
         abstracts = df['abstracts']
         return abstracts, keywords 
+    
+def make_metrics_csv(ke: KeywordExtractor, methods: dict):
+    df = pd.DataFrame()
+    for key in methods.keys():
+        rank_dict = ke.order_nodes(methods[key], to_print=False)
+        headers = pd.MultiIndex.from_product([[methods[key]], ["Word", "Ranking"]])
+        df = pd.concat([df, pd.DataFrame(list(rank_dict.items()), columns=headers)], axis=1)
+    
+    df.to_csv('my_dict.csv', index=False)
