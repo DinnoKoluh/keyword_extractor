@@ -276,8 +276,8 @@
 	
 	\begin{spacing}{1.5}
 	\section*{Abstract}
-	In the era of information overload it became essential to efficiently extract concise, precise and quality information from large texts. One aspect of information extraction is keyword extraction where large texts are represented as sets of tokens i.e. keywords. This prospect of keyword extraction is paramount to researchers as they deal with huge numbers of scientific papers, and having a good and concise representation of those papers is essential for them. This thesis paper addresses that problem in the realm of natural language processing (NLP). \\
-	Using core concepts of NLP and modeling texts as graphs, we are going to build a model for the automatic extraction of keywords. This is done in an unsupervised manner as the importance of a word is calculated through the position and weights associated with respective words in the graph. The first metric used to calculate the graph weights are co-occurrence matrices and the other metric are word embeddings. Word embeddings became a crucial way of representing the semantic information of words as dense vectors. \\
+	In the era of information overload it is essential to efficiently extract concise, precise and quality information from large texts. One aspect of information extraction is keyword extraction where large texts are represented as sets of keywords. This prospect of keyword extraction is paramount to researchers as they deal with huge numbers of scientific papers, and having a good and concise representation of those papers is essential for them. This thesis addresses that problem in the realm of Natural Language Processing (NLP). \\
+	Using core NLP concepts and modeling texts as graphs, we are going to build a model for the automatic extraction of keywords. This is done in an unsupervised manner as the importance of a word is calculated through the position and weights associated with respective words in the graph. The first metric used to calculate the graph weights are co-occurrence matrices and the other metric are word embeddings. Word embeddings became a crucial way of representing the semantic information of words as dense vectors. \\
 	The results of this paper were compared with keywords that were provided by authors of scientific papers in the area of computer science which act as the ground truth, but crucially are not a component in the model construction, but just serve as a verifier of the model's accuracy.
 	
 	\textbf{Keywords}: NLP, keyword extraction, scientific papers, graphs, word-embeddings
@@ -302,7 +302,7 @@
 	\pagestyle{fancy}
 	%\thispagestyle{empty}
 	\section{Introduction and Motivation}
-	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of some key concepts like \textit{word-embeddings} \cite{word-embedding-survey} (which we are going to use) and \textit{transformers} \cite{transformers-survey}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be a bit shifted from Deep Neural Network (DNN) models and more to traditional Machine Learning (ML) models. \\
+	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of key concepts like \textit{word-embeddings} \cite{word-embedding-survey} (which we are going to use) and \textit{transformers} \cite{transformers-survey}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be a bit shifted from Deep Neural Network (DNN) models and more to traditional Machine Learning (ML) models. \\
 	NLP has many subfields and application areas such as:
 	\begin{itemize}
 		\item Text classification
@@ -313,14 +313,17 @@
 		\item Conversational agents
 		\item Sentiment analysis
 	\end{itemize} 
-	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of the scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. "deep learning") while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise. \\
-	The model to be used for keyword extraction is \textbf{graph-based}. The motivation behind using graphs is that graphs are a well-studied and understood concept and many practical problems can be represented with graphs. There are also a plethora of algorithms which are going to be useful for the case of instance ranking. \\
-	The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that some preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter. \\
+	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. "deep learning") while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise.
+	
+	The model to be used for keyword extraction is \textbf{graph-based}. The motivation behind using graphs is that graphs are a well-studied and understood concept and many practical problems can be represented with graphs. There are also a plethora of algorithms which are going to be useful for the case of node ranking.
+	
+	The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter.
+	
 	As stated, the nodes of the graph will be modeled as words, but the question comes on how to model the edges of the graph? \\
-	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed ans used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning (whatever that might mean in some general picture) also have similar vector representations and that we can use the usual mathematical tools on these vectors like the dot product which means that we can actually measure the similarity between words. \\
+	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed and used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning (whatever that might mean in some general picture) also have similar vector representations and that we can use the usual mathematical tools on these vectors like the dot product which means that we can actually measure the similarity between words. \\
 	We now have the complete representation of the input text as a graph. Now we need to somehow rank the nodes according to the graph edges and weights. We can refer to the ranking procedure as to finding the importance of each node. There are several algorithms which can find the importance of nodes, and we will speak in more detail about them later, but for now can assume we have a black box which takes in the graph representation of the abstract as described before and gives us all the nodes (word) ranked by their importance. \\
 	We now have a list of the most important words, but there is one more step that we can do to get a more robust output. The given output would be a list of words, but we might want to have phrases instead of keywords (e.g. the phrase "scientific paper" is more representative instead of just "paper"). We can use the words we got out from the graph and traverse the initial text for phrases in which they appear. Then based on those phrases in the initial text and the importance of the words which they are made of, we can get alongside the ranked words also the phrases in which they appear. In this way we can also generalize the problem by letting a phrase be only made up of one keyword. If it is made up of more than one keyword we can average it out, and in the end get the ranking of the specific phrases which appear in the input text. \\
-	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts. In the next few chapters we are going to look in more detail in the inner workings of the steps involved. We will start with the NLP preprocessing pipeline.
+	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts. In the next chapters we are going to look in more detail in the inner workings of the steps involved. We will start with the NLP preprocessing pipeline.
 	
 	
 	\newpage
@@ -337,24 +340,24 @@
 	\begin{center}
 		unlucky $\rightarrow$ [un, lucky]
 	\end{center}
-	Here, we have that the adjective "unlucky" was broken into its prefix "un" and the adjective "lucky". In this example tokenization provided a way to work with text on a granular level, breaking down words into units which might not even be real words, but in this way we are making text processing tasks more cohesive for machines. \\
+	The adjective "unlucky" was broken into its prefix "un" and the adjective "lucky". In this example tokenization provided a way to work with text on a granular level, breaking down words into units which might not even be real words, but in this way we are making text processing tasks more cohesive for machines. \\
 	The process of \textbf{tokenization} would be the process of breaking down an input text into single tokens. As the input text inherently has whitespaces and newlines, those are usually excluded from the obtained tokens. We can look at an example sentence broken down into tokens: 
 	\begin{center}
 		She didn't have time. $\rightarrow$ [She, did, n't, have, time, .]
 	\end{center}
 	When dealing with whitespaces, tokenization is a trivial process, but when dealing with punctuations, tokenization becomes a hard problem. The reason is that sometimes punctuations should be kept, but sometimes they should be separated. In the example above, the token "time." was separated into "time" and ".", but let's take a look at this example:
 	\begin{center}
-		She didn't have time for Mr. Nobody. $\rightarrow$ [She, did, n't, have, time, for, Mr., Nobody, .]
+		She didn't have time for Mr. Robot. $\rightarrow$ [She, did, n't, have, time, for, Mr., Robot, .]
 	\end{center}
-	In this example the period for the token "Mr." was not separated while for "Nobody." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example of ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
+	In this example the period for the token "Mr." was not separated while for "Robot." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example of ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
 	
 	\subsection{Sentence splitting}
-	Sentence splitting is the process of splitting up text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using the sliding window we don't want to capture the end of one sentence and the beginning of the next one in the same context as they might not carry the same meaning as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
-	Sentence splitting has inherently similar problems as tokenization does as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. Apart from punctuation signs, sentences in quotation marks inside sentence cause problems as such sentences are basically nested sentences. But for our purposes we don't expect to have many such examples in scientific paper abstracts.
+	Sentence splitting is the process of splitting up text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using a sliding window we don't want to capture the end of one sentence and the beginning of the next one in the same context as they might not carry the same meaning as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
+	Sentence splitting has inherently similar problems as tokenization does, as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. Apart from punctuation signs, sentences in quotation marks that are inside other sentences cause problems as such sentences are basically nested sentences. But for our purposes we don't expect to have many such examples in scientific paper abstracts.
 	
 	\subsection{MWE}
 	MWE or Multi-Word Expressions are sequences of words that when grouped together carry one meaning, but when standing alone carry another. An example of an MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting them together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning". \\
-	When dealing with scientific papers, we expect that they are going to have many MWEs and possibly new, non-existent MWEs. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep an MWE lexicon. Another solution, which was observed while inspecting the dataset is that novel MWEs are usually written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
+	When dealing with scientific papers, we expect that there are going to be many MWEs and possibly new, non-existent MWEs. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep an MWE lexicon. Another solution, which was observed while inspecting the dataset is that novel MWEs are usually written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
 	Let us see an example for MWE tokenization:
 	\begin{center}
 		We are discussing Machine Learning (ML) models in San Francisco. $\rightarrow$ \\
@@ -364,8 +367,8 @@
 	
 	\subsection{Token removal based on PoS tags}
 	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. telling if a word is a noun, verb, adjective, etc. The question is why do we need this step?\\
-	The reason is the nature of the task we are doing. Namely, keywords are usually a phrase of an adjective and verb or at most a single noun. Taking this into consideration we can substantially reduce the graph size if we just keep nouns and adjective as the possible graph nodes. There are several ways on getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
-	We are not going into the inner workings of these methods, but we will just use an existing model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are \textit{homographs} (they are spelled the same but have a different meaning) but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
+	The reason is the nature of the task we are doing. Namely, keywords are usually a phrase of an adjective and a noun or at most a single noun. Taking this into consideration we can substantially reduce the graph size if we just keep nouns and adjectives as the possible graph nodes. There are several ways of getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
+	We are not going into the inner workings of these methods, but we will just use an existing model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are \textit{homographs} \footnote{Homographs are words which are spelled the same but have a different meaning.} but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
 	\begin{center}
 		Japan[Noun] developed[Verb] into[Prep.] a[Det.] developed[Adj.] nation[Noun].
 	\end{center}
@@ -380,7 +383,7 @@
 	\begin{center}
 		The quick brown fox jumped over the lazy dog. $\rightarrow$ [quick, brown, fox, jumped, lazy, dog, .]
 	\end{center} 
-	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as stopword removal is a cheap operation.
+	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as it is a cheap operation.
 	
 	\subsection{Lemmatization}
 	Lemmatization is an NLP technique used to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to transfer those words to their root form. Some examples of lemmatization is show below:
@@ -430,9 +433,9 @@
 	\subsection{How to Represent Words as Numbers?}
 	The big challenge of any text processing on a computer is how to represent words as numbers? This is a fundamental question in NLP as computers inherently work with numbers and NLP works with words. In contrast to other areas of computer science like image processing and audio processing whose working medium (images and waveforms) can be and are represented with numbers, there is no apparent way on how to represent the working medium of NLP (words) as numbers.
 	
-	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot meaningfully represent the essence of a word among thousands of other words. The idea is to somehow represent the features of words. For example features of "orange" are that it is a fruit, round, orange colored, etc. In contrast a "banana" is also a fruit but it is curved and yellow. So in that sense, we could encode the features of words as numbers, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those word features as \textit{feature vectors} and this is the point where we come to word embeddings.
+	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot meaningfully represent the essence of a word among thousands of other words. The idea is to somehow represent the features of words. For example, the features of "orange" are that it is a fruit, round, orange colored, etc. In contrast, a "banana" is also a fruit but it is curved and yellow. So in that sense, we could encode the features of words as numbers, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those word features as \textit{feature vectors} and this is the point where we come to word embeddings.
 	
-	\textbf{Word embeddings} are representations of words as real-valued dense vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process and store. Let us look at an example of a $2$D subspace of a larger, high-dimensional space. We can see how words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
+	\textbf{Word embeddings} are representations of words as real-valued dense vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have, and they become abstract so that there is no sense in even interpreting them. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process and store. Let us look at an example of a $2$D subspace of a larger, high-dimensional space. We can see how words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
 	\begin{figure}[H]
 		\centering
 		\hspace*{-1.0cm}
@@ -444,7 +447,7 @@
 	
 	The numbers on the Gender and Age axes are just for presentation purpose as word embeddings are usually real-valued which means they are also continuous. The reason for such a representation instead of an integer or one-hot representation is that continuous and dense vectors capture more accurate and subtle semantic relations between words. The other reason is that real-valued embeddings are more efficient for computation than other sparse representations. The vector elements are also usually in the range $[-1, 1]$ for normalization purposes when using them in neural networks. 
 	
-	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as more male (grandfather, man, boy), the higher values are regarded as more female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of person the words have higher or lower values. We can see the power of embeddings, as the vector representation of a word does really carry meaning in such a space. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$ dimensions, will have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
+	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as more male (grandfather, man, boy), the higher values are regarded as more female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of a person the words have higher or lower values. We can see the power of embeddings, as the vector representation of a word does really carry meaning in such a space. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$ dimensions, will have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
 	\begin{figure}[H]
 		\centering
 
@@ -484,12 +487,12 @@
 	Some apparent problems using word embeddings as they were described are:
 	\begin{enumerate}
 		\item How to embed phrases (or MWE)?\\
-		When training the network on target words, we can define \textit{target phrases} instead of words. There is actually a model called phrase2vec exclusively build for phrase embedding. There are also models which can embed sentences as vectors, so we can treat sentences as phrases.
+		When training the network on target words, we can define \textit{target phrases} instead of words. There is actually a model called phrase2vec exclusively built for phrase embedding. There are also models which can embed sentences as vectors, so we can treat sentences as phrases.
 		\item How to deal with homonymy (words with different meaning but written the same)? \\
 		To overcome this problem, \textit{multi-sense} embeddings can be used, where a word can be mapped to more embeddings considering a word's context \cite{multi_sense_we}. 
 	\end{enumerate}
 	
-	Let us also explain how are we going to use word embeddings in the graph model. Once the graph is built, with words as nodes and the edges as connections between the words (gotten from the co-occurrence matrix which will be explained in the next chapter), we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
+	Let us also explain how are we going to use word embeddings in the graph model. Once the graph is built, with words as nodes and the edges as connections between the words (gotten from the co-occurrence matrix which will be explained in the next chapter), we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two adjacent nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
 	
 	
 	\newpage
@@ -505,16 +508,6 @@
 	
 	\begin{figure}[H]
 		\centering
-%		$$
-%		\renewcommand\arraystretch{0.8} 
-%		\begin{bmatrix}
-%			0 & 1 & 3 & 1 & 0 \\
-%			1 & 0 & 0 & 0 & 2 \\
-%			3 & 0 & 0 & 2 & 0 \\
-%			1 & 0 & 2 & 0 & 1 \\
-%			0 & 2 & 0 & 1 & 0
-%		\end{bmatrix}
-%		$$
 		\includegraphics[scale=1.0]{graph_adjacency}		
 		%\captionsetup{justification=centering}
 		\caption{Example of weighted graph and its adjacency matrix}
@@ -543,7 +536,7 @@
 		\label{co_matrix_construction}
 	\end{figure}
 	
-	The last step left to do it to transforms the co-occurrence matrix to a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. One thing to note is that the co-occurrence matrix in the Figure \ref{co_matrix_construction} is sparse, so for memory purposes, we actually store the adjacency matrix as a dictionary (a version of the adjacency list) where the keys are the pair-wise word occurrences and the values are the number of co-occurrences (the graph weights).
+	The last step left to do is to transform the co-occurrence matrix into a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. One thing to note is that the co-occurrence matrix in the Figure \ref{co_matrix_construction} is sparse, so for memory purposes, we actually store the adjacency matrix as a dictionary (a version of the adjacency list) where the keys are the pair-wise word occurrences and the values are the number of co-occurrences (the graph weights).
 	In Figure \ref{graph_example} we can see the graph representation of the example above.
 	
 	\begin{figure}[H]
@@ -577,7 +570,7 @@
 	\begin{equation}
 		C_d(v) = \frac{\deg(v)}{|\mathcal{V}|-1}
 	\end{equation}
-	We divide the node degree by the number of nodes minus $1$ to normalize the degree centrality, so that all the values are in the range $[0, -1]$. In the Figure \ref{graph_example} we can check the degree centralities of a few different nodes like 
+	We divide the node degree by the number of nodes minus $1$ to normalize the degree centrality, so that all the values are in the range $[0, 1]$. In the Figure \ref{graph_example} we can check the degree centralities of a few different nodes like 
 	$$C_d(\text{japan}) = \frac{\deg\text{(japan)}}{|\mathcal{V}|-1} = \frac{6}{13-1} = 0.50$$
 	$$C_d(\text{sea}) = \frac{\deg\text{(sea)}}{|\mathcal{V}|-1} = \frac{3}{13-1} = 0.25$$
 	We can see that the edge weights are not considered in this ranking algorithm. From the standpoint of text, words with high degree centrality would be the ones which are frequently present in the context windows of other words. However this might not capture the full semantic meaning as we are not looking at the weights of the edges. Nevertheless, this algorithm gives us still a simple but effective way to rank words in a text. 	
@@ -587,7 +580,7 @@
 	\begin{equation}
 		C_c(v) = \frac{|\mathcal{V}|-1}{\sum_{u=1}^{|\mathcal{V}|} d(u,v)}
 	\end{equation}
-	where $d(u,v)$ is the shortest distance between nodes $u$ and $v$. When talking about the distance between two adjacent nodes, that distance is the edge weight. So, the shortest distance between any two nodes is the set of edges which connect the two nodes such that the sum of their weights is minimal. The most famous algorithm used for this task is Dijkstra's algorithm. In the case that the graph in not completely connected, the closeness centrality would be computed for each connected part seperately and then scaled by the size of that part. 
+	where $d(u,v)$ is the shortest distance between nodes $u$ and $v$. When talking about the distance between two adjacent nodes, that distance is the edge weight. So, the shortest distance between any two nodes is the set of edges which connect the two nodes such that the sum of their weights is minimal. The most famous algorithm used for finding the shortest distance between two nodes in a graph is Dijkstra's algorithm. In the case that the graph in not completely connected, the closeness centrality would be computed for each connected part separately and then scaled by the size of that part. 
 	
 	In Figure \ref{graph_adjacency} the shortest distance between nodes $A$ and $E$ is $2$ along the path $A - D - E$ even though from the figure it might look like it is the path $A - B - E$ but that path has a distance of $3$. We can calculate the closeness centrality for "japan" in Figure \ref{graph_example}: 
 	\begin{equation*}
@@ -598,7 +591,7 @@
 			& = \frac{12}{26}
 		\end{split}
 	\end{equation*}
-	In this manner the closeness can be calculated for all the other edges. The meaning of the obtained closeness score is that higher scores are assigned to nodes that are, on average, closer to all the other nodes in the graph. An intuitive example is when cities and the roads between them are modeled as graphs. Then, the cities which are well connected to other cities and located centrally in a country have higher closeness scores (e.g. Madrid vs. Barcelona in Spain).  
+	In this manner the closeness can be calculated for all the other nodes. The meaning of the obtained closeness score is that higher scores are assigned to nodes that are, on average, closer to all the other nodes in the graph. An intuitive example is when cities and the roads between them are modeled as graphs. Then, the cities which are well connected to other cities and located centrally in a country have higher closeness scores (e.g. Madrid vs. Barcelona in Spain).  
 	
 	When it comes to text, words with high closeness scores are on average closer to other words which means that they are central to the concept and the overall flow of information in text. Such words are potentially important for understanding the core meaning or theme of the text, as they are well-connected to other words and might play a crucial role in conveying the context. They could also act as bridges between different parts of the text (e.g. in example Figure \ref{co_matrix_construction}, Japan connects the first two sentences and fish connects the second and third sentence).
 	
@@ -607,9 +600,9 @@
 	\begin{equation}
 		C_B(v) = \sum_{s,t \in \mathcal{V}} \frac{\sigma(s, t|v)}{\sigma(s,t)}
 	\end{equation}
-	where $\sigma(s,t)$ is the number of shortest paths between nodes $s$ and $t$, and $\sigma(s, t|v)$ is the number of those paths that pass through node $v$. If $v \in s, t$ then $\sigma(s, t|v) = 0$ \cite{freeman}. This expression is usually normalized by multiplying it by the factor $\frac{2}{(|\mathcal{V}| -1)(|\mathcal{V}| - 2)}$. One thing to note is that, the shortest path between two nodes is not unique, there might be more than one path that has the minimum distance between two nodes (e.g. in Figure \ref{graph_adjacency} the distances of paths $A - C$ and $A - D - C$ between nodes $A$ and $C$ are the same).
+	where $\sigma(s,t)$ is the number of shortest paths between nodes $s$ and $t$, and $\sigma(s, t|v)$ is the number of those paths that pass through node $v$. If $v \in \{s, t\}$ then $\sigma(s, t|v) = 0$ \cite{freeman}. This expression is usually normalized by multiplying it by the factor $\frac{2}{(|\mathcal{V}| -1)(|\mathcal{V}| - 2)}$. One thing to note is that, the shortest path between two nodes is not unique, there might be more than one path that has the minimum distance between two nodes (e.g. in Figure \ref{graph_adjacency} the distances of paths $A - C$ and $A - D - C$ between nodes $A$ and $C$ are the same).
 	
-	Betweenness centrality quantifies the number of times a node serves as a bridge along the shortest paths between pairs of other nodes in the graph. Nodes with high betweenness centrality play a crucial role in maintaining efficient flow and connectivity within a graph. Calculating the betweenness score can be quite tiresome when doing it by hand for larger graphs, so instead of the example in Figure \ref{graph_example} we will show how the example in Figure \ref{graph_adjacency}. Let us firstly list all the pairs of nodes that have more than one shortest paths:
+	Betweenness centrality quantifies the number of times a node serves as a bridge along the shortest paths between pairs of other nodes in the graph. Nodes with high betweenness centrality play a crucial role in maintaining efficient flow and connectivity within a graph. Calculating the betweenness score can be quite tiresome when doing it by hand for larger graphs, so instead of the example in Figure \ref{graph_example} we will show how the example in Figure \ref{graph_adjacency}. Let us firstly list all the pairs of nodes that have more than one shortest path:
 	\begin{flushleft}
 		$A$ to $C$: $A - C$, $A - D - C$ \\
 		$A$ to $E$: $A - D - E$ \\
@@ -631,7 +624,7 @@
 	When it comes to text, words with high betweenness scores act as "bridges" or "connectors" between different parts of text, as they might appear in position which link distinct text concepts. On the other hand, words with low scores may be isolated or play a more local role on a sentence or phrase level rather than a text level.
 	
 	\subsection{Eigenvector centrality}
-	Eigenvector centrality is a measure of the importance of a node in a graph, taking into account both its direct connections to other nodes, and the connections of its neighbors. A node has a high eigenvector centrality score if it is connected to other nodes that have a high score. The eigenvector score of a node \textit{i} is defined as the sum of the scores of its neighbors multiplied by the edge weights and scaled by a factor $\lambda$. Let $\mathbf{A}$ be the adjacency matrix of a graph $\mathcal{G}$, where the entry $a_{v,t}$ of $\mathbf{A}$ is the edge weight between nodes $v$ and $t$ then the centrality score $x_v$ of node $v$ is defined as:
+	Eigenvector centrality is a measure of the importance of a node in a graph, taking into account both its direct connections to other nodes, and the connections of its neighbors. A node has a high eigenvector centrality score if it is connected to other nodes that have a high score. The eigenvector score of node \textit{i} is defined as the sum of the scores of its neighbors multiplied by the edge weights and scaled by a factor $\lambda$. Let $\mathbf{A}$ be the adjacency matrix of a graph $\mathcal{G}$, where the entry $a_{v,t}$ of $\mathbf{A}$ is the edge weight between nodes $v$ and $t$ then the centrality score $x_v$ of node $v$ is defined as:
 	\begin{equation}\label{eigenvector_1}
 		x_v = \frac{1}{\lambda} \sum_{t \in \mathcal{V}} a_{v,t} x_t
 	\end{equation}
@@ -639,7 +632,7 @@
 	\begin{equation}\label{eigenvector_2}
 		\mathbf{A}\mathbf{x} = \lambda \mathbf{x}
 	\end{equation}
-	which the definition of an eigenvector, hence the name eigenvector centrality. The scaling factor $\lambda$ is the eigenvalue assigned to the eigenvector. The number of eigenvalues for the adjacency matrix $\mathbf{A}$ is going to be the number of nodes $|\mathcal{V}|$, so which one do we choose?
+	which is the definition of an eigenvector, hence the name eigenvector centrality. The scaling factor $\lambda$ is the eigenvalue assigned to the eigenvector. The number of eigenvalues for the adjacency matrix $\mathbf{A}$ is going to be the number of nodes $|\mathcal{V}|$, so which one do we choose?
 	
 	The centrality score of the \textit{i}-th node is obtained as the \textit{i}-th component of the eigenvector $\mathbf{x}$ with the highest eigenvalue $\lambda$ (also called the \textit{dominant eigenvector}). This condition of using the dominant eigenvector for the scores comes from the fact that the scores have to be positive. \footnote{By the Perron-Frobenius theorem a real square matrix with positive entries has a unique eigenvalue of largest magnitude and the eigenvalue is real. The corresponding eigenvector can be chosen to have strictly positive components.} The eigenvector is defined up to the eigenvalue $\lambda$, so only the ratios of the centralities of the nodes are well defined. We can go a step further to make sure that the scores are in the range $[0, 1]$ by using the unit vector $\mathbf{x}/||\mathbf{x}||$. Let us demonstrate this ranking algorithm on the graph in Figure \ref{graph_adjacency} where we get that the dominant eigenvector is:
 	$$ \mathbf{x} = 
@@ -666,7 +659,7 @@
 	\subsection{PageRank (TextRank) algorithm}
 	PageRank is a ranking algorithm, originally used by Google's search engine to rank web pages in the search engine results \cite{pagerank}. The internet can be modeled as a graph where the web pages are the nodes and the hyperlinks between them are the edges. This idea can be applied to text as well, where the variation of the algorithm is called \textbf{textrank} \cite{textrank} but we will keep the name PageRank as the ranking algorithm.
 	
-	The basic idea behind the algorithm is the notion of \textit{casting votes}. When one node links to another is casts a vote for the that other node. The higher the number of votes for a node, the higher the importance for that node. The importance of the vote that was casted by the initial node is influenced by the importance of that node itself. For a weighted graph, the vote of node $j$ to node $i$ is scaled by the ratio of the $(i,j)$ edge weight to the sum of all the edge weights of node $j$. In this way only a part of the $j$ node's vote is casted towards node $i$. Casting all the votes toward the node $i$ we get the following recurrence relation for the PageRank (PR) score: 
+	The basic idea behind the algorithm is the notion of \textit{casting votes}. When one node links to another is casts a vote for the that other node. The higher the number of votes for a node, the higher the importance for that node. The importance of the vote that was casted by the initial node is influenced by the importance of that node itself. For a weighted graph, the vote of node $j$ to node $i$ is scaled by the ratio of the $(i,j)$ edge weight to the sum of all the edge weights of node $j$. In this way only a part of the $j$ node's vote is casted towards node $i$. Casting all the votes towards the node $i$ we get the following recurrence relation for the PageRank (PR) score: 
 	\begin{equation}\label{pagerank1}
 		PR(v_i) = \sum_{v_j \in N(v_i)} \frac{w_{j,i}}{\sum_{v_k \in N(v_j)} w_{j,k}} PR(v_j) 
 	\end{equation}
@@ -713,40 +706,41 @@
 		\end{split}
 	\end{equation*}
 	When it comes to text, words with high PageRank scores are central concepts and they are likely to be connected to other important words in the text (the same concept as web pages and web search) \cite{textrank}. 
-	\subsection{Katz centrality}
-	Katz
 	
-	g
-	
-	g
-	
-	g
-	
-	g
+%	\subsection{Katz centrality}
+%	Katz centrality is a measure of node centrality in a graph, which takes into account both the number of neighbors of a node and the centrality of those neighbors. In fact, it is a generalization of the eigenvector centrality with two parameters which influence the value of the centrality score. The mathematical notation of Katz's centrality for a node $x_v$ is defined as:
+%	\begin{equation}
+%		x_v = \alpha \sum_{t \in \mathcal{V}} a_{v,t} x_t + \beta
+%	\end{equation}
+%	where the parameter $\alpha$ controls the influence of the influence of the neighboring nodes and it is constrained as $ \alpha \in (0, 1/\lambda_{max}) $ and the parameter $\beta$ controls the initial centrality of the node. The equation can be also written in matrix notation as:
+%	\begin{equation}
+%		\mathbf{x} = \alpha \mathbf{A}\mathbf{x} + \beta \mathbf{1}
+%	\end{equation}
+%	The scores $\mathbf{x}$ are also usually scaled to a unit vector. The main 
 	
 	\subsection{Comparing the ranking algorithms}
 	To conclude this section let us apply all the ranking algorithms on the example graph from Figure \ref{graph_example} that models the sentences from Figure \ref{co_matrix_construction} in the form of a table.
 	\begin{table}[H]
+		\centering
 		\caption{Ranking values for the example in Figure \ref{graph_example}.}
-		\scalebox{0.65}{
-		\hspace*{-1cm}
-		\begin{tabular}{|cc|cc|cc|cc|cc|cc|}
+		\scalebox{0.70}{
+		\begin{tabular}{|cc|cc|cc|cc|cc|}
 			\hline
-			\multicolumn{2}{|c|}{Degree centrality}      & \multicolumn{2}{c|}{Closeness Centrality}   & \multicolumn{2}{c|}{Betweenness Centrality} & \multicolumn{2}{c|}{Eigenvector Centrality} & \multicolumn{2}{c|}{Pagerank}                & \multicolumn{2}{c|}{Katz Centrality}        \\ \hline
-			\multicolumn{1}{|c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking \\ \hline
-			\multicolumn{1}{|c|}{japan}         & 0.5     & \multicolumn{1}{c|}{japan}         & 0.462   & \multicolumn{1}{c|}{japan}         & 0.566   & \multicolumn{1}{c|}{japan}         & 0.515   & \multicolumn{1}{c|}{fish}          & 0.148   & \multicolumn{1}{c|}{japan}         & 0.374   \\ \hline
-			\multicolumn{1}{|c|}{fish}          & 0.5     & \multicolumn{1}{c|}{source}        & 0.444   & \multicolumn{1}{c|}{fish}          & 0.505   & \multicolumn{1}{c|}{great}         & 0.431   & \multicolumn{1}{c|}{japan}         & 0.148   & \multicolumn{1}{c|}{fish}          & 0.354   \\ \hline
-			\multicolumn{1}{|c|}{great}         & 0.333   & \multicolumn{1}{c|}{sea}           & 0.444   & \multicolumn{1}{c|}{source}        & 0.227   & \multicolumn{1}{c|}{country}       & 0.33    & \multicolumn{1}{c|}{great}         & 0.111   & \multicolumn{1}{c|}{great}         & 0.327   \\ \hline
-			\multicolumn{1}{|c|}{country}       & 0.25    & \multicolumn{1}{c|}{fish}          & 0.429   & \multicolumn{1}{c|}{sea}           & 0.227   & \multicolumn{1}{c|}{economy}       & 0.309   & \multicolumn{1}{c|}{famous}        & 0.074   & \multicolumn{1}{c|}{country}       & 0.278   \\ \hline
-			\multicolumn{1}{|c|}{famous}        & 0.25    & \multicolumn{1}{c|}{island}        & 0.353   & \multicolumn{1}{c|}{economy}       & 0.129   & \multicolumn{1}{c|}{fish}          & 0.279   & \multicolumn{1}{c|}{rice}          & 0.074   & \multicolumn{1}{c|}{source}        & 0.277   \\ \hline
-			\multicolumn{1}{|c|}{rice}          & 0.25    & \multicolumn{1}{c|}{economy}       & 0.353   & \multicolumn{1}{c|}{food}          & 0.068   & \multicolumn{1}{c|}{source}        & 0.27    & \multicolumn{1}{c|}{source}        & 0.074   & \multicolumn{1}{c|}{sea}           & 0.277   \\ \hline
-			\multicolumn{1}{|c|}{source}        & 0.25    & \multicolumn{1}{c|}{food}          & 0.333   & \multicolumn{1}{c|}{sushi}         & 0.068   & \multicolumn{1}{c|}{sea}           & 0.27    & \multicolumn{1}{c|}{sea}           & 0.074   & \multicolumn{1}{c|}{economy}       & 0.273   \\ \hline
-			\multicolumn{1}{|c|}{sea}           & 0.25    & \multicolumn{1}{c|}{sushi}         & 0.333   & \multicolumn{1}{c|}{island}        & 0.064   & \multicolumn{1}{c|}{island}        & 0.171   & \multicolumn{1}{c|}{country}       & 0.074   & \multicolumn{1}{c|}{famous}        & 0.268   \\ \hline
-			\multicolumn{1}{|c|}{economy}       & 0.25    & \multicolumn{1}{c|}{great}         & 0.3     & \multicolumn{1}{c|}{great}         & 0.03    & \multicolumn{1}{c|}{famous}        & 0.164   & \multicolumn{1}{c|}{economy}       & 0.074   & \multicolumn{1}{c|}{rice}          & 0.268   \\ \hline
-			\multicolumn{1}{|c|}{food}          & 0.167   & \multicolumn{1}{c|}{world\_war\_2} & 0.293   & \multicolumn{1}{c|}{country}       & 0.023   & \multicolumn{1}{c|}{rice}          & 0.164   & \multicolumn{1}{c|}{food}          & 0.037   & \multicolumn{1}{c|}{island}        & 0.214   \\ \hline
-			\multicolumn{1}{|c|}{sushi}         & 0.167   & \multicolumn{1}{c|}{country}       & 0.293   & \multicolumn{1}{c|}{famous}        & 0.015   & \multicolumn{1}{c|}{world\_war\_2} & 0.15    & \multicolumn{1}{c|}{sushi}         & 0.037   & \multicolumn{1}{c|}{food}          & 0.211   \\ \hline
-			\multicolumn{1}{|c|}{island}        & 0.167   & \multicolumn{1}{c|}{famous}        & 0.273   & \multicolumn{1}{c|}{rice}          & 0.015   & \multicolumn{1}{c|}{food}          & 0.09    & \multicolumn{1}{c|}{island}        & 0.037   & \multicolumn{1}{c|}{sushi}         & 0.211   \\ \hline
-			\multicolumn{1}{|c|}{world\_war\_2} & 0.167   & \multicolumn{1}{c|}{rice}          & 0.273   & \multicolumn{1}{c|}{world\_war\_2} & 0.011   & \multicolumn{1}{c|}{sushi}         & 0.09    & \multicolumn{1}{c|}{world\_war\_2} & 0.037   & \multicolumn{1}{c|}{world\_war\_2} & 0.209   \\ \hline
+			\multicolumn{2}{|c|}{Degree Centrality}      & \multicolumn{2}{c|}{Closeness Centrality}   & \multicolumn{2}{c|}{Betweenness Centrality} & \multicolumn{2}{c|}{Eigenvector Centrality} & \multicolumn{2}{c|}{PageRank}                \\ \hline
+			\multicolumn{1}{|c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking \\ \hline
+			\multicolumn{1}{|c|}{japan}         & 0.5     & \multicolumn{1}{c|}{japan}         & 0.462   & \multicolumn{1}{c|}{japan}         & 0.566   & \multicolumn{1}{c|}{japan}         & 0.515   & \multicolumn{1}{c|}{fish}          & 0.148   \\ \hline
+			\multicolumn{1}{|c|}{fish}          & 0.5     & \multicolumn{1}{c|}{source}        & 0.444   & \multicolumn{1}{c|}{fish}          & 0.505   & \multicolumn{1}{c|}{great}         & 0.431   & \multicolumn{1}{c|}{japan}         & 0.148   \\ \hline
+			\multicolumn{1}{|c|}{great}         & 0.333   & \multicolumn{1}{c|}{sea}           & 0.444   & \multicolumn{1}{c|}{source}        & 0.227   & \multicolumn{1}{c|}{country}       & 0.33    & \multicolumn{1}{c|}{great}         & 0.111   \\ \hline
+			\multicolumn{1}{|c|}{country}       & 0.25    & \multicolumn{1}{c|}{fish}          & 0.429   & \multicolumn{1}{c|}{sea}           & 0.227   & \multicolumn{1}{c|}{economy}       & 0.309   & \multicolumn{1}{c|}{famous}        & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{famous}        & 0.25    & \multicolumn{1}{c|}{island}        & 0.353   & \multicolumn{1}{c|}{economy}       & 0.129   & \multicolumn{1}{c|}{fish}          & 0.279   & \multicolumn{1}{c|}{rice}          & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{rice}          & 0.25    & \multicolumn{1}{c|}{economy}       & 0.353   & \multicolumn{1}{c|}{food}          & 0.068   & \multicolumn{1}{c|}{source}        & 0.27    & \multicolumn{1}{c|}{source}        & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{source}        & 0.25    & \multicolumn{1}{c|}{food}          & 0.333   & \multicolumn{1}{c|}{sushi}         & 0.068   & \multicolumn{1}{c|}{sea}           & 0.27    & \multicolumn{1}{c|}{sea}           & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{sea}           & 0.25    & \multicolumn{1}{c|}{sushi}         & 0.333   & \multicolumn{1}{c|}{island}        & 0.064   & \multicolumn{1}{c|}{island}        & 0.171   & \multicolumn{1}{c|}{country}       & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{economy}       & 0.25    & \multicolumn{1}{c|}{great}         & 0.3     & \multicolumn{1}{c|}{great}         & 0.03    & \multicolumn{1}{c|}{famous}        & 0.164   & \multicolumn{1}{c|}{economy}       & 0.074   \\ \hline
+			\multicolumn{1}{|c|}{food}          & 0.167   & \multicolumn{1}{c|}{world\_war\_2} & 0.293   & \multicolumn{1}{c|}{country}       & 0.023   & \multicolumn{1}{c|}{rice}          & 0.164   & \multicolumn{1}{c|}{food}          & 0.037   \\ \hline
+			\multicolumn{1}{|c|}{sushi}         & 0.167   & \multicolumn{1}{c|}{country}       & 0.293   & \multicolumn{1}{c|}{famous}        & 0.015   & \multicolumn{1}{c|}{world\_war\_2} & 0.15    & \multicolumn{1}{c|}{sushi}         & 0.037   \\ \hline
+			\multicolumn{1}{|c|}{island}        & 0.167   & \multicolumn{1}{c|}{famous}        & 0.273   & \multicolumn{1}{c|}{rice}          & 0.015   & \multicolumn{1}{c|}{food}          & 0.09    & \multicolumn{1}{c|}{island}        & 0.037   \\ \hline
+			\multicolumn{1}{|c|}{world\_war\_2} & 0.167   & \multicolumn{1}{c|}{rice}          & 0.273   & \multicolumn{1}{c|}{world\_war\_2} & 0.011   & \multicolumn{1}{c|}{sushi}         & 0.09    & \multicolumn{1}{c|}{world\_war\_2} & 0.037   \\ \hline
 		\end{tabular}
 	}
 	\end{table}
@@ -859,6 +853,10 @@
 		\bibitem{textrank}
 		Mihalcea, Rada, and Paul Tarau. "\textit{Textrank: Bringing order into text}." Proceedings of the 2004 conference on empirical methods in natural language processing (2004). \\
 		\texttt{URL: }\url{https://aclanthology.org/W04-3252.pdf}
+		
+		\bibitem{katz}
+		Katz, Leo. "\textit{A new status index derived from sociometric analysis}." Psychometrika (1953). \\
+		\texttt{URL: }\url{https://www.cse.cuhk.edu.hk/~cslui/CMSC5734/katz-1953.pdf}
 		
 		\bibitem{ieeexplore}
 		IEEE Xplore digital library.
