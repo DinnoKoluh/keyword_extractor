@@ -729,6 +729,7 @@
 	\begin{table}[H]
 		\caption{Ranking values for the example in Figure \ref{graph_example}.}
 		\scalebox{0.65}{
+		\hspace*{-1cm}
 		\begin{tabular}{|cc|cc|cc|cc|cc|cc|}
 			\hline
 			\multicolumn{2}{|c|}{Degree centrality}      & \multicolumn{2}{c|}{Closeness Centrality}   & \multicolumn{2}{c|}{Betweenness Centrality} & \multicolumn{2}{c|}{Eigenvector Centrality} & \multicolumn{2}{c|}{Pagerank}                & \multicolumn{2}{c|}{Katz Centrality}        \\ \hline
@@ -758,11 +759,11 @@
 	In this section we will perform tests on a dataset of scientific paper abstracts. We will define the metrics used to evaluate the model and in the end we will see the obtained results and discuss them. Let us firstly look at the dataset used.
 	
 	\subsection{Dataset}
-	We already mentioned in the Introduction section that this paper will focus on the keyword extraction from scientific paper abstracts, more precisely computer science papers. Apart from the paper abstracts, we would also need the \textit{ground truth} labels i.e. the human assigned keywords to be able to test the keyword extraction pipeline. A good place to get both, the abstracts and keywords is the IEEE Xplore digital library \footnote{IEEE Xplore digital library is a research database for discovery and access to journal articles, conference proceedings, technical standards, and related materials on computer science, electrical engineering and electronics, and similar fields.} \cite{ieeexplore}. 
+	We already mentioned in the Introduction section that the thesis will focus on the keyword extraction from scientific paper abstracts, more precisely computer science papers. Apart from the paper abstracts, we would also need the \textit{ground truth} labels i.e. the human assigned keywords to be able to test the keyword extraction pipeline. A good place to get both, the abstracts and keywords is the IEEE Xplore digital library \footnote{IEEE Xplore digital library is a research database for discovery and access to journal articles, conference proceedings, technical standards, and related materials on computer science, electrical engineering and electronics, and similar fields.} \cite{ieeexplore}. 
 	
 	Inspired by the web scrapper at \cite{scrapper}, computer science papers can be filtered out among millions others and their abstracts, titles and keywords can be scraped from the IEEE Xplore web page. The computer science areas on which the filter was applied are: artificial intelligence, optimization, feature extraction, neural nets, medical image processing, image classification, computational complexity, object detection, cloud computing, IoT and pattern classification. A final set of $5000$ papers was chosen as the dataset. 
 	
-	One thing to note is that the keyword extraction will be done on the paper's abstract and title. It is also common that keywords assigned by humans are not present neither in the abstract nor the title, but are gathered as keywords which describe the paper but are not present in the abstract. This will affect the accuracy of the model. 
+	One thing to note is that the keyword extraction will be done on the paper's abstract and title. It is also common that keywords assigned by humans are not present neither in the abstract nor the title, but are human generated, so the maximum achievable accuracy of the model is less than $100 \%$.
 	
 	\subsection{Evaluation metrics}
 	The last thing to define before starting testing are \textbf{evaluation metrics} which quantify the model. The standard evaluation metrics in NLP are accuracy, precision, recall and the F-score. Before defining them, let us see the format of a \textbf{confusion matrix}\footnote{A confusion matrix is a table used in machine learning and statistics to evaluate the performance of a classification algorithm.} in Figure \ref{confusion}.
@@ -774,26 +775,31 @@
 		\caption{Confusion matrix}
 		\label{confusion}
 	\end{figure}
-	
-	Based on the confusion matrix we can define the metrics:
+	Based on the confusion matrix we can define its entries for the case of keyword extraction as:
 	\begin{itemize}
-		\item Accuracy defined as the ratio of correct predictions to the total number of of instances or:
+		\item True positives: keywords that are correctly identified by the model.
+		\item False positives: non-keywords that are incorrectly identified as keywords by the model.
+		\item False negatives: keywords that are not identified by the model
+		\item True negatives: non-keywords that are correctly identified as non-keywords by the model (this will not be explicitly calculated). 
+	\end{itemize}
+	Now we can defined the metrics:
+	\begin{itemize}
+		\item \textbf{Accuracy} defined as the ratio of correct predictions to the total number of of instances or:
 		$$ \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}. $$
-		\item Precision is defined as the ratio of true positives to the sum of true positives and false positives or:
+		We will not use this measure as it contains the true negatives which do not make sense to calculate for the case of keyword extraction.
+		\item \textbf{Precision} is defined as the ratio of true positives to the sum of true positives and false positives or:
 		$$ \text{Precision} = \frac{TP}{TP + FP}. $$
-		It basically measures the accuracy of the positive predictions made by the model.
-		\item Recall is defined as the ratio of true positives to the sum of true positives and false negatives or:
+		It basically measures the accuracy of the positive predictions made by the model. In terms of keyword extraction, precision measures the fraction of identified keywords that are actually keywords.
+		
+		\item \textbf{Recall} is defined as the ratio of true positives to the sum of true positives and false negatives or:
 		$$ \text{Recall} = \frac{TP}{TP + FN}. $$
-		It basically tells us of all the instances that were actually positive, how many the model correctly predicted as positive.
-		\item F-score is defined as the harmonic mean of precision and recall or:
+		It basically tells us of all the instances that were actually positive, how many the model correctly predicted as positive. In terms of keyword extraction, recall measures the fraction of actual keywords that are correctly identified.
+		\item \textbf{F-score} is defined as the harmonic mean of precision and recall or:
 		$$ \text{F-score} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} $$
 		This score tells us how well the model balances between precision and recall. The F-score ranges from $0$ to $1$ and higher scores indicate better performance in both precision and recall.  
 	\end{itemize}
-	
-%	Macroaveraging:
-%	Compute performance for each class
-%	Average over classes
-%	Better reflects the statistics of smaller classes
+	To capture the metrics for all the abstracts, we will average the metrics across all the abstracts, which is also called \textbf{macro-averaging}. We have all the prerequisites, so we can now see the results of keyword extraction on the dataset.
+
 	\subsection{Testing}
 	
 	\newpage
