@@ -43,7 +43,7 @@ class KeywordExtractor:
         for u, v, data in self.graph.edges(data=True):
             if 'weight' in data:
                 data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0][0]
-                data['weight'] = np.round(data['weight'], decimals=3)
+                data['weight'] = np.round(data['weight'], decimals=3) + 1 # because of negative weights
         print(f"Added word-embedding weights!")
         self.added_weights = True
 
@@ -59,7 +59,7 @@ class KeywordExtractor:
         elif method=="eigenvector_centrality":
             degree_order = nx.eigenvector_centrality(self.graph, weight="weight")
         elif method=="pagerank":
-            degree_order = nx.pagerank(nx.Graph(self.graph), alpha=1, weight="weight")
+            degree_order = nx.pagerank(nx.Graph(self.graph), alpha=0.85, weight="weight")
         elif method=="closeness_centrality":
             degree_order = nx.closeness_centrality(self.graph, distance="weight")
         elif method=="katz_centrality":
@@ -68,9 +68,9 @@ class KeywordExtractor:
             degree_order, _ = nx.hits(self.graph)
         else:
             raise Exception("Wrong method name!")
-        print(f"Method selected: {method}")
         sorted_dict = dict(sorted(degree_order.items(), key=lambda item: item[1], reverse=True))
         if to_print:
+            print(f"Method selected: {method}")
             for node, order_value in sorted_dict.items():
                 print(f"Node: {node:{20}}   --->    Node Order = {order_value}")
         sorted_dict = {key: round(value, 3) for key, value in sorted_dict.items()}
