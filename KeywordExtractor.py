@@ -6,12 +6,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 # https://networkx.org/documentation/stable/tutorial.html
 
 class KeywordExtractor:
-    def __init__(self, abstract):
+    def __init__(self, abstract, window_size):
         self.abstract = abstract # raw input text
         self.tokens, self.sentences = prune_text(abstract) # list of tokens and sentences 
         self.unique_tokens = list(set(self.tokens))
         self.co = {} # co-occurrence representation as a dictionary, it is initialized in the init_graph method, the edges are represented as tuples
         # and they are the keys of the dictionary while the weights are the values
+        self.window_size = window_size
         self.graph = self.init_graph() # graph structure where the relations between tokens are saved
         self.added_weights = False # if the embedding weights have already been added to graph
 
@@ -21,7 +22,7 @@ class KeywordExtractor:
         them. The weights are calculated based on the co-occurrence of tokens in a predefined sliding window.
         """
         graph = nx.Graph()
-        co, index_dict = get_co(self.sentences)
+        co, index_dict = get_co(sentences = self.sentences, window_size = self.window_size)
         self.co = co # initialize the co-occurrence dictionary
         graph.add_nodes_from(index_dict)
         # unpack the dictionary and initialize the graph with edges and weights
@@ -43,8 +44,8 @@ class KeywordExtractor:
         for u, v, data in self.graph.edges(data=True):
             if 'weight' in data:
                 data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0][0]
-                data['weight'] = np.round(data['weight'], decimals=3) + 1 # because of negative weights
-        print(f"Added word-embedding weights!")
+                data['weight'] = np.round(data['weight'], decimals=3) + 2 # because of negative weights
+        #print(f"Added word-embedding weights!")
         self.added_weights = True
 
     def order_nodes(self, method="degree_centrality", to_print=True):
