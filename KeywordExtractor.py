@@ -41,10 +41,16 @@ class KeywordExtractor:
         if self.added_weights:
             print(f"Weights already added!")
             return
+        minimum_weight = float('inf')
         for u, v, data in self.graph.edges(data=True):
             if 'weight' in data:
                 data['weight'] *= cosine_similarity(get_word_em(u).reshape(1, -1), get_word_em(v).reshape(1, -1))[0][0]
-                data['weight'] = np.round(data['weight'], decimals=3) + 2 # because of negative weights
+                data['weight'] = np.round(data['weight'], decimals=3) + 0 # because of negative weights
+                if data['weight'] < minimum_weight:
+                    minimum_weight = data['weight']
+        
+        for _, _, data in self.graph.edges(data=True):
+            data['weight'] += abs(minimum_weight) + 1
         #print(f"Added word-embedding weights!")
         self.added_weights = True
 

@@ -28,3 +28,5 @@ data_cleanup.ipynb
 *.png
 *scrapper
 *csv
+*xlsx
+*json

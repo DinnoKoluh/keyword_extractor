@@ -2,6 +2,9 @@ import pandas as pd
 from ast import literal_eval
 import networkx as nx
 from KeywordExtractor import KeywordExtractor
+import json
+import numpy as np
+
 
 def load_abstract(name):
     """
@@ -70,6 +73,16 @@ def get_prf(true_keywords: list, predicted_keywords: list):
     
     return tp/(tp + fp), tp/(tp + fn), tp/(tp + 0.5*(fp+fn))
 
+def save_data(metrics_dict, predicted_keywords_dict, df, ws):
+    mean_metrics_dict = {}
+    for key in metrics_dict.keys():
+        mean_metrics_dict[key] = np.round(np.mean(np.array(metrics_dict[key])), decimals=4)
+    with open(f'data/mean_metrics_{ws}.json', 'w') as json_file:
+        json.dump(mean_metrics_dict, json_file, indent=4)   
+
+    new_data = pd.DataFrame(predicted_keywords_dict)
+    result_df = pd.concat([df, new_data], axis=1)
+    result_df.to_csv(f'data/metrics_per_abstract_{ws}.csv', index=False)
 
 def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int):
     """
@@ -100,8 +113,8 @@ def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int):
                 ke_keywords = list(keyword_dict.keys())[0:num_of_true_keywords+1] # add one extra keyword
                 predicted_keywords_dict[methods[key]].append(ke_keywords)
                 p, r, f = get_prf(keywords[i], ke_keywords) # calculating p, r, f
-                #predicted_keywords_dict[f'{methods[key]}_prf'].append(f'p = {p:.3f}, r = {r:.3f}, f = {f:.3f}')
-                predicted_keywords_dict[f'{methods[key]}_prf'].append([p, r, f])
+                predicted_keywords_dict[f'{methods[key]}_prf'].append(f'p = {p:.3f}, r = {r:.3f}, f = {f:.3f}')
+                #predicted_keywords_dict[f'{methods[key]}_prf'].append([p, r, f])
                 metrics_dict[f'{methods[key]}_p'].append(p)
                 metrics_dict[f'{methods[key]}_r'].append(r)
                 metrics_dict[f'{methods[key]}_f'].append(f)
@@ -109,13 +122,10 @@ def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int):
                 print(f'Failed on abstract: {i}, \n error: {e}')
                 predicted_keywords_dict[methods[key]].append(["ERROR"])
                 predicted_keywords_dict[f'{methods[key]}_prf'].append(f'error')
-        if i % 10 == 0:
+        if i % 200 == 0:
             print(f"Finished {i+1}. abstract")
-            if i == 100: 
-                break
-    new_data = pd.DataFrame(predicted_keywords_dict)
-
-    result_df = pd.concat([df, new_data], axis=1)
-    result_df.to_csv('data/metrics_per_abstract.csv', index=False)
-
+            save_data(metrics_dict, predicted_keywords_dict, df, window_size)
+        # if i == 100: 
+        #     break
+    save_data(metrics_dict, predicted_keywords_dict, df, window_size)
     return metrics_dict

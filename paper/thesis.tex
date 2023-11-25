@@ -36,6 +36,10 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+% \usepackage{tabu} % for thick lines in tables
+\usepackage{makecell}
+\usepackage{hhline}
+
 \usepackage{multicol} % multikolone
 \usepackage{graphicx}
 \usepackage{setspace}
@@ -796,8 +800,45 @@
 
 	\subsection{Testing}
 	
+	
+	% Please add the following required packages to your document preamble:
+	% \usepackage{multirow}
+	\begin{table}[H]
+		\renewcommand\arraystretch{1.2}
+		\begin{tabular}{|c|c|>{\centering\arraybackslash}p{3cm}|p{3cm}|p{3cm}|}
+			\hline
+			Window   Size       & Ranking Algorithm      & Precision & Recall & F-score \\ \Xcline{1-5}{1mm}
+			\multirow{5}{*}{3}  & Degree Centrality      &     4.5      &        &         \\ \cline{2-5} 
+			& Closeness Centrality   &           &        &         \\ \cline{2-5}
+			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
+			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
+			& PageRank               &           &        &         \\ \Xcline{1-5}{1mm}
+			\multirow{5}{*}{5}  & Degree Centrality      &           &        &         \\ \cline{2-5} 
+			& Closeness Centrality   &           &        &         \\ \cline{2-5} 
+			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
+			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
+			& PageRank               &           &        &         \\ \Xcline{1-5}{1mm}
+			\multirow{5}{*}{10} & Degree Centrality      &           &        &         \\ \cline{2-5} 
+			& Closeness Centrality   &           &        &         \\ \cline{2-5} 
+			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
+			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
+			& PageRank               &           &        &         \\ \hline
+		\end{tabular}
+	\end{table}
+	
+	
+	
+	
+	
 	\newpage
 	\section{Conclusion}
+	
+	
+	
+	
+	
+	
+	
 	
 	\newpage
 	\section{Literature}
