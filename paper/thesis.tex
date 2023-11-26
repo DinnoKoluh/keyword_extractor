@@ -725,6 +725,7 @@
 	\subsection{Comparing the ranking algorithms}
 	To conclude this section let us apply all the ranking algorithms on the example graph from Figure \ref{graph_example} that models the sentences from Figure \ref{co_matrix_construction} in the form of a table.
 	\begin{table}[H]
+		\label{table1}
 		\centering
 		\caption{Ranking values for the example in Figure \ref{graph_example}.}
 		\scalebox{0.70}{
@@ -797,46 +798,56 @@
 		This score tells us how well the model balances between precision and recall. The F-score ranges from $0$ to $1$ and higher scores indicate better performance in both precision and recall.  
 	\end{itemize}
 	To capture the metrics for all the abstracts, we will average the metrics across all the abstracts, which is also called \textbf{macro-averaging}. We have all the prerequisites, so we can now see the results of keyword extraction on the dataset.
-
+	\newpage
 	\subsection{Testing}
+	Before discussing the testing results let us address some key elements of keyword extraction:
+	\begin{itemize}
+		\item All the development and testing were done in Python. The co-occurrence matrix construction was written from scratch. The NLP pipeline was built using the \textit{nltk} library with some specific blocks built from scratch (e.g. the sliding window). The graph and ranking algorithms were built from the \textit{networkx} library. The word embedding "\textit{glove-wiki-gigaword-50}" model from the \textit{gensim} library was used, with $50$ dimensional vectors.
+		\item The human assigned keywords can be subjective and most importantly they can be human generated, so the maximum achievable results when comparing the to the human assigned keywords are less than 100 \%.
+		\item The expected precision, recall and F-score should be in the range $10 - 40 \%$ as presented in these papers \cite{ying_yan}, \cite{mothe}, \cite{keyword-extraction-0}, \cite{textrank}.
+		\item When using the cosine similarity in word embeddings, negative values may arise, and for some of the ranking algorithms we require positive weights (e.g. for path finding). To solve this issue, all the edge weights in a graph were offset by the minimum weight value, so that we only deal with positive values.
+	\end{itemize}	
+	The final, macro-averaged, results are shown in Table \ref{tab:main_table}. For all the $5000$ papers, the precision, recall and F-score were computed after which they were averaged. A hyperparameter that has influence on the results is the window size, so for three different value of the window size, we can see the keyword extraction results. 
 	
+	We can observe that the computed results are in the expected range we mentioned that other papers have gotten. One unexpected result is that changing the window size didn't much of an impact. The reason for this is how we implemented the sliding window, namely that the sliding window doesn't cross sentences and if sentences are not long, changing the window size will not have much of an impact. Still, we can observe a slight decrease in performance when increasing window size which was also observed in \cite{textrank}. The explanation is, when using larger window sizes we can capture more context but it might also introduce noise, by including less relevant words, diluting the meaningful co-occurrence patterns, which could lead to a decrease in precision and recall. 
 	
-	% Please add the following required packages to your document preamble:
-	% \usepackage{multirow}
-	\begin{table}[H]
-		\renewcommand\arraystretch{1.2}
-		\begin{tabular}{|c|c|>{\centering\arraybackslash}p{3cm}|p{3cm}|p{3cm}|}
+	\begin{table}[H] 
+		\caption{Keyword extraction results for precision recall and F-score for different window sizes.}
+		\label{tab:main_table}
+		\hspace*{-1cm}
+		\renewcommand\arraystretch{1.1}
+		\begin{tabular}{|c|c|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|}
 			\hline
-			Window   Size       & Ranking Algorithm      & Precision & Recall & F-score \\ \Xcline{1-5}{1mm}
-			\multirow{5}{*}{3}  & Degree Centrality      &     4.5      &        &         \\ \cline{2-5} 
-			& Closeness Centrality   &           &        &         \\ \cline{2-5}
-			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
-			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
-			& PageRank               &           &        &         \\ \Xcline{1-5}{1mm}
-			\multirow{5}{*}{5}  & Degree Centrality      &           &        &         \\ \cline{2-5} 
-			& Closeness Centrality   &           &        &         \\ \cline{2-5} 
-			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
-			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
-			& PageRank               &           &        &         \\ \Xcline{1-5}{1mm}
-			\multirow{5}{*}{10} & Degree Centrality      &           &        &         \\ \cline{2-5} 
-			& Closeness Centrality   &           &        &         \\ \cline{2-5} 
-			& Betweenness Centrality &           &        &         \\ \cline{2-5} 
-			& Eigenvector Centrality &           &        &         \\ \cline{2-5} 
-			& PageRank               &           &        &         \\ \hline
+		Window   Size       & Ranking   Algorithm    & Precision (\%) & Recall (\%) & F-score (\%) \\ \Xcline{1-5}{1mm}
+		\multirow{5}{*}{3}  & Degree Centrality      & 29.37          & 33.19       & 31.16        \\ \cline{2-5} 
+		& Closeness Centrality   & 25.33          & 28.62       & 26.87        \\ \cline{2-5} 
+		& Betweenness Centrality & 25.83          & 29.17       & 27.39        \\ \cline{2-5} 
+		& Eigenvector Centrality & 27.99          & 31.64       & 29.70        \\ \cline{2-5} 
+		& PageRank               & \textbf{29.60}          & \textbf{33.45}       & \textbf{31.40}        \\ \Xcline{1-5}{1mm}
+		\multirow{5}{*}{5}  & Degree Centrality      & 29.38          & 33.20       & 31.17        \\ \cline{2-5} 
+		& Closeness Centrality   & 24.93          & 28.16       & 26.45        \\ \cline{2-5} 
+		& Betweenness Centrality & 25.66          & 28.98       & 27.21        \\ \cline{2-5} 
+		& Eigenvector Centrality & 27.93          & 31.57       & 29.63        \\ \cline{2-5} 
+		& PageRank               & 29.37          & 33.19       & 31.16        \\ \Xcline{1-5}{1mm}
+		\multirow{5}{*}{10} & Degree Centrality      & 28.55          & 32.26       & 30.28        \\ \cline{2-5} 
+		& Closeness Centrality   & 24.03          & 27.13       & 25.48        \\ \cline{2-5} 
+		& Betweenness Centrality & 25.31          & 28.58       & 26.84        \\ \cline{2-5} 
+		& Eigenvector Centrality & 24.34          & 27.49       & 25.81        \\ \cline{2-5} 
+		& PageRank               & 28.57          & 32.28       & 30.31        \\ \Xcline{1-5}{1mm}
 		\end{tabular}
 	\end{table}
 	
+	The best results were observed for the PageRank ranking algorithm (the TextRank version of it) for the window size of $3$. The low values in precision and recall in no means signify a bad model, as the model correctly found the most important words in the text, but the profound nature of the task is the reason for the values. Concerning the values, having precision and recall in a similar range signifies a balanced performance in terms of correctly identifying true keywords and capturing all true keywords. 
 	
-	
-	
-	
+	We can also mention the good performance of degree centrality ranking even though it takes only into account the node connections, not the edge weights which indicates the importance of the \textit{distributional hypothesis}.
+
 	\newpage
 	\section{Conclusion}
+	And the conclusionssss
 	
 	
 	
-	
-	
+	Unsupervised, fast, subjective, good initial guess, 
 	
 	
 	
@@ -906,6 +917,15 @@
 		\bibitem{scrapper}
 		A script for scraping scientific papers from IEEE Xplore digital Library.
 		\texttt{URL: }\url{https://github.com/NifulIslam/Multilabel-CS-Keyword-Prediction/tree/master/Scrapper}
+		
+		\bibitem{ying_yan}
+		Ying, Yan, et al. "\textit{A graph-based approach of automatic keyphrase extraction}." Procedia Computer Science (2017).\\
+		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/pii/S1877050917303629}
+		
+		\bibitem{mothe}
+		Mothe, J., Ramiandrisoa, F., Rasolomanana, M. "\textit{Automatic keyphrase extraction using graph-based methods}." In Proceedings of the 33rd Annual ACM Symposium on Applied Computing (2018).\\
+		\texttt{URL: }\url{https://dl.acm.org/doi/abs/10.1145/3167132.3167392}
+		
 		
 		
 		
