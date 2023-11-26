@@ -803,13 +803,14 @@
 	Before discussing the testing results let us address some key elements of keyword extraction:
 	\begin{itemize}
 		\item All the development and testing were done in Python. The co-occurrence matrix construction was written from scratch. The NLP pipeline was built using the \textit{nltk} library with some specific blocks built from scratch (e.g. the sliding window). The graph and ranking algorithms were built from the \textit{networkx} library. The word embedding "\textit{glove-wiki-gigaword-50}" model from the \textit{gensim} library was used, with $50$ dimensional vectors.
-		\item The human assigned keywords can be subjective and most importantly they can be human generated, so the maximum achievable results when comparing the to the human assigned keywords are less than 100 \%.
+		\item The human assigned keywords can be subjective and most importantly they can be human generated, so the maximum achievable results when comparing the to the human assigned keywords are less than 100\%.
 		\item The expected precision, recall and F-score should be in the range $10 - 40 \%$ as presented in these papers \cite{ying_yan}, \cite{mothe}, \cite{keyword-extraction-0}, \cite{textrank}.
-		\item When using the cosine similarity in word embeddings, negative values may arise, and for some of the ranking algorithms we require positive weights (e.g. for path finding). To solve this issue, all the edge weights in a graph were offset by the minimum weight value, so that we only deal with positive values.
+		\item When using the cosine similarity in word embeddings, negative values may arise, and for some of the ranking algorithms we require positive weights (e.g. for path finding). To solve this issue, all the edge weights in a graph were offset by the absolute value of the minimum weight value, so that we only deal with positive values.
+		\item To calculate the metrics, we selected the top $n$ keywords calculated by the model, where $n$ is the number of true keywords from the dataset. In such a manner we can directly compare the predicted and true keywords.
 	\end{itemize}	
-	The final, macro-averaged, results are shown in Table \ref{tab:main_table}. For all the $5000$ papers, the precision, recall and F-score were computed after which they were averaged. A hyperparameter that has influence on the results is the window size, so for three different value of the window size, we can see the keyword extraction results. 
+	The final, macro-averaged, results are shown in Table \ref{tab:main_table}. For all the $5000$ papers, the precision, recall and F-score were computed after which they were averaged. The hyperparameter that was changed was the the window size, so for three different values of the window size, we can see the keyword extraction results. 
 	
-	We can observe that the computed results are in the expected range we mentioned that other papers have gotten. One unexpected result is that changing the window size didn't much of an impact. The reason for this is how we implemented the sliding window, namely that the sliding window doesn't cross sentences and if sentences are not long, changing the window size will not have much of an impact. Still, we can observe a slight decrease in performance when increasing window size which was also observed in \cite{textrank}. The explanation is, when using larger window sizes we can capture more context but it might also introduce noise, by including less relevant words, diluting the meaningful co-occurrence patterns, which could lead to a decrease in precision and recall. 
+	We can observe that the computed results are in the expected range that other papers have obtained. One unexpected result is that changing the window size didn't have much of an impact. The reason for this is how we implemented the sliding window, namely that the sliding window doesn't cross sentences and if sentences are not long, changing the window size will not have much of an impact. Still, we can observe a slight decrease in performance when increasing window size which was also observed in \cite{textrank}. The explanation is, when using larger window sizes we can capture more context but it might also introduce noise, by including less relevant words, diluting the meaningful co-occurrence patterns, which could lead to a decrease in precision and recall. 
 	
 	\begin{table}[H] 
 		\caption{Keyword extraction results for precision recall and F-score for different window sizes.}
@@ -837,17 +838,23 @@
 		\end{tabular}
 	\end{table}
 	
-	The best results were observed for the PageRank ranking algorithm (the TextRank version of it) for the window size of $3$. The low values in precision and recall in no means signify a bad model, as the model correctly found the most important words in the text, but the profound nature of the task is the reason for the values. Concerning the values, having precision and recall in a similar range signifies a balanced performance in terms of correctly identifying true keywords and capturing all true keywords. 
+	The best results were observed for the PageRank ranking algorithm (the TextRank version of it) for the window size of $3$. The low values in precision and recall in no means signify a bad model, as the model correctly found the most important words in the text, but the profound nature of the task is the reason for the values. In regards to the values, having precision and recall in a similar range signifies a balanced performance in terms of correctly identifying true keywords and capturing all true keywords. 
 	
 	We can also mention the good performance of degree centrality ranking even though it takes only into account the node connections, not the edge weights which indicates the importance of the \textit{distributional hypothesis}.
 
 	\newpage
 	\section{Conclusion}
-	And the conclusionssss
+	In this thesis work, we tackled the problem of automatic keyword extraction using graph-based methods and word embeddings. The problem was narrowed down to extract keywords from paper abstracts in the domain of computer science. The foundation of the used approach lays in constructing a graph representation of the co-occurrence relationships among nouns and adjectives within paper abstracts, leveraging the robustness of word embeddings. After building the graph representation of the paper abstracts, various centrality measures for graphs were used to rank the words in the abstract. The measures used were: Degree Centrality, Closeness Centrality, Betweenness Centrality, Eigenvector Centrality and PageRank. Each algorithm brought a unique perspective to the identification of significant words, offering a nuanced understanding of their importance within the context of the given abstracts.
 	
+	The evaluation of the model's performance incorporated fundamental metrics such as precision, recall, and F-score. Macro-averaging, accounting for variations in abstract characteristics, provided a comprehensive view of the model's generalization capabilities. The observed results, falling within the range of outcomes reported in existing literature on this topic, prove the concept of using the ranking algorithms for keyword extraction. The best results were observed for the PageRank algorithm, more specifically the text version of it. 
 	
+	While the model exhibits promising results, it is essential to acknowledge its limitations. Factors such as domain-specific nuances and the inherent ambiguity of language pose challenges that call for further investigation. Future research endeavors could dive deeper into these challenges, refining the model to accommodate varying linguistic contexts and enhancing its adaptability across different datasets.
 	
-	Unsupervised, fast, subjective, good initial guess, 
+	The most promising features of using a graph-based model, is that it is unsupervised and fast. The swift nature of the model aligns with the practical demands of real-world applications, where efficiency and autonomy are paramount. It most certainly can be used as a particularly good initial guess when doing information retrieval. 
+	
+	In conclusion, this thesis highlights the importance of harnessing unsupervised graph-based methods for keyword extraction, providing a scalable and adaptable solution for real-world applications. As we look ahead, there is potential for further refinement and expansion of this approach, ensuring its continued relevance and utility in an ever-evolving landscape of textual data.
+	
+
 	
 	
 	
