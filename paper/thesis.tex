@@ -306,7 +306,7 @@
 	\pagestyle{fancy}
 	%\thispagestyle{empty}
 	\section{Introduction and Motivation}
-	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of key concepts like \textit{word-embeddings} \cite{word-embedding-survey} (which we are going to use) and \textit{transformers} \cite{transformers-survey}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis. Our focus will be a bit shifted from Deep Neural Network (DNN) models and more to traditional Machine Learning (ML) models.
+	Natural Language Processing (NLP) is a subfield or Artificial Intelligence (AI) and linguistics that has a focus on the interaction between computers and human languages. This is mostly restricted to written language as other fields (like Speech Processing) deal with spoken language (using audio instead of textual features). In the past decade NLP has seen huge attention with the introduction of key concepts like \textit{word-embeddings} \cite{word-embedding-survey} (which we are going to use) and \textit{transformers} \cite{transformers-survey}. At the moment of writing of this paper, NLP is the subfield of AI that has the most resources invested into it, mostly in research and development, with new large language models (LLMs) coming out on a daily basis \cite{great_transformer}. Our focus will be a bit shifted from Deep Neural Network (DNN) models and more to traditional Machine Learning (ML) models.
 	
 	NLP has many subfields and application areas such as:
 	\begin{itemize}
@@ -318,26 +318,37 @@
 		\item Conversational agents
 		\item Sentiment analysis
 	\end{itemize} 
-
+	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}.
+	
 	\subsection{Problem statement}
-	The field we are going to be working on will be \textbf{information retrieval}, more precisely \textit{keyword extraction}. Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This is the topic we are going to be working on as well. The keywords are going to be extracted from the abstracts of scientific papers. One detail we should address that will be important later is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords would be single words or at most MWEs (Multi-Word expressions, i.e. "deep learning") while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise.
+	Keyword (keyphrase) extraction is the automatic selection of important and topical phrases from the body of a document \cite{keyword-extraction-0}. Vast textual data across diverse domains, from academic literature and news articles to social media and business reports, stresses the need for efficient methods to identify and extract key terms. Scientific papers are usually the area where keywords are frequently used as researchers use them for a quick overview of papers and also sorting papers into different categories. This thesis will address the problem of extracting keywords from the abstracts of scientific papers. We are going to narrow down the domain to computer science papers. 
+	
+	An important detail is the distinction between \textit{keywords} and \textit{keyphrases}. Keywords are single words or at most MWEs (Multi-Word expressions, i.e. "deep learning") while keyphrases are more complicated entities comprised of several words and they act as a single unit (e.g. the phrase "scientific paper" would be a keyphrase). When doing keyword extraction we might have as an output a combination of both, keywords and keyphrases. Usually keyphrases carry more information than keywords but a combination of both as an output is most representative. From now on, when referring to \textit{keywords} it will also include \textit{keyphrases}, if not explicitly stated otherwise.
+	
+	Despite the advancements made in NLP, keyword extraction remains a nuanced challenge. The biggest issues of this problem are contextual ambiguities, domain specific words and limitations in accurately identifying and ranking keywords. This paper, in no means, will fully solve this problem, but a goal was set. The main goal of this thesis is to use well-established concepts of graph-based models for keyword extraction and apply them to scientific paper abstracts in the domain of computer science and verify the results obtained in the literature. Through this analysis, we seek to get valuable insights and practical solutions to the evolving landscape of NLP and information retrieval.
 	
 	\subsection{Methodology}
 	
-	The model to be used for keyword extraction is \textbf{graph-based}. The motivation behind using graphs is that graphs are a well-studied and understood concept and many practical problems can be represented with graphs. There are also a plethora of algorithms which are going to be useful for the case of node ranking.
+	The model to be used for keyword extraction is \textbf{graph-based}. The motivation behind using graphs is that they are a well-studied and understood concept and many practical problems can be represented with graphs. There is also a plethora of algorithms which are going to be useful for the case of node ranking.
 	
-	The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that preprocessing of the raw text will be required, especially when dealing with MWEs. We will speak about this in the next chapter.
+	The idea is to model words in a paper abstract as nodes of a graph. Not all the words in the abstract should be included, as keywords are usually composed of a combination of nouns and adjectives (e.g. scientific[ADJ] paper[N]). This means that preprocessing of the raw text will be required, especially when dealing with MWEs.
 	
-	As stated, the nodes of the graph will be modeled as words, but the question comes on how to model the edges of the graph? \\
-	It starts from the assumption that words that occur in the same context tend to carry a similar meaning. The idea is to use a \textbf{sliding window} of some predefined size and words that are in that window are connected with and edge. In that way the final graph carries semantic (the meaning of words) information of the input text. The number of occurrences when sliding the window over the entire text will give us the initial graph weights. To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed and used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning also have vector representations that are placed closely in the vector space. We can use the usual mathematical tools on these vectors,  like the dot product, which means that we can actually measure the similarity between words. \\
-	We now have the complete representation of the input text as a graph. Now we need to somehow rank the nodes according to the graph edges and weights. We can refer to the ranking procedure as to finding the importance of each node. There are several algorithms which can find the importance of nodes, and we will speak in more detail about them later, but for now can assume we have a black box which takes in the graph representation of the abstract as described before and gives us all the nodes (word) ranked by their importance. \\
-	We now have a list of the most important words, but there is one more step that we can do to get a more robust output. The given output would be a list of words, but we might want to have phrases instead of keywords (e.g. the phrase "scientific paper" is more representative instead of just "paper"). We can use the words we got out from the graph and traverse the initial text for phrases in which they appear. Then based on those phrases in the initial text and the importance of the words which they are made of, we can get alongside the ranked words also the phrases in which they appear. In this way we can also generalize the problem by letting a phrase be only made up of one keyword. If it is made up of more than one keyword we can average it out, and in the end get the ranking of the specific phrases which appear in the input text. \\
-	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts. In the next chapters we are going to look in more detail in the inner workings of the steps involved. We will start with the NLP preprocessing pipeline.
+	The nodes of the graph will be modeled as words, but the question comes on how to model the edges of the graph? \\
+	It starts from the assumption that words that occur in the same context tend to carry a similar meaning referred as the \textit{distributional hypothesis} \cite{distributional}. The idea is to use a \textbf{sliding window} of some predefined size and words that occur in that window are connected with and edge. The number of co-occurrences of words when sliding the window over the entire text are encoded in a \textbf{co-occurrence} matrix. The rows and columns of this matrix represent the words in the text. Each matrix cell entry $(i, j)$ contains the number of occurrences of the two words $i$ and $j$ in the same context. These matrix entries will give us the initial graph weights. In this way the final graph carries semantic (the meaning of words) information of the input text. 
+	
+	To solidify this relationship another metric that we will use are word embeddings. Word embeddings are essentially a way of representing words as vectors of numbers. We will dive more deeply into how word embeddings are computed and used but for now we can assume that word embeddings are vectors of numbers and that these vectors carry semantic information of the corresponding word. This means that words that have a similar meaning also have vector representations that are placed closely in the vector space. We can use the usual mathematical tools on these vectors,  like the dot product, and actually measure the similarity between words.
+	
+	We now have the complete representation of the input text as a graph. Now we need to somehow rank the nodes according to the graph edges and weights. We can refer to the ranking procedure as to finding the importance of each node. There are several algorithms which can find the importance of nodes, and we will speak in more detail about them later, but for now can assume we have a black box which takes in the graph representation of the abstract as described before and gives us all the nodes (word) ranked by their importance. 
+	
+	We now have a list of the most important words, but there is one more step that we can do to get a more robust output. The given output would be a list of words, but we might want to have phrases instead of keywords (e.g. the phrase "scientific paper" is more representative instead of just "paper"). We can use the words we got out from the graph and traverse the initial text for phrases in which they appear. Then based on those phrases in the initial text and the importance of the words which they are made of, we can get alongside the ranked words also the phrases in which they appear. In this way we can also generalize the problem by letting a phrase be only made up of one keyword. If it is made up of more than one keyword we can average it out, and in the end get the ranking of the specific phrases which appear in the input text.
+	
+	This was a rough explanation of the procedures which should give us an overview of the steps involved in developing a pipeline for the extraction of keywords from paper abstracts.
 	
 	
 	\newpage
 	\section{NLP Pipeline}
-	In this chapter we are going to explain the preprocessing steps needed to transform the raw input text into something that can be modeled with a graph. These preprocessing steps are going to be carried out with concepts from NLP like tokenization, sentence splitting, lemmatization, etc. All these NLP concepts used for preprocessing can be stacked into a pipeline hence the name of the chapter, \textbf{NLP pipeline}.\\
+	In this chapter we are going to explain the preprocessing steps needed to transform the raw input text into something that can be modeled with a graph. These preprocessing steps are going to be carried out with concepts from NLP like tokenization, sentence splitting, lemmatization, etc. All these NLP concepts used for preprocessing can be stacked into a pipeline hence the name of the chapter, \textbf{NLP pipeline}.
+	
 	We will explain these concepts giving examples and at the end show the whole pipeline as a schema. In the end we will have single instances of processed words.
 	
 	\subsection{Tokenization}
@@ -358,15 +369,19 @@
 	\begin{center}
 		She didn't have time for Mr. Robot. $\rightarrow$ [She, did, n't, have, time, for, Mr., Robot, .]
 	\end{center}
-	In this example the period for the token "Mr." was not separated while for "Robot." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example of ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them.
+	In this example the period for the token "Mr." was not separated while for "Robot." it was. This is the reason why tokenization can be ambiguous and hard to compute correctly. And there are tens of other example of ambiguities apart from punctuation marks. One solution to the problem we've seen is to keep a \textbf{lexicon} of possible ambiguous tokens so we know how to separate them. The tokenizer we will use is the Penn Treebank tokenizer \cite{tokenizer} which uses regular expressions to tokenize text as in Penn Treebank \cite{penn}.
+	
+	
 	
 	\subsection{Sentence splitting}
-	Sentence splitting is the process of splitting up text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using a sliding window we don't want to capture the end of one sentence and the beginning of the next one in the same context as they might not carry the same meaning as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text. \\
+	Sentence splitting is the process of splitting up text into sentences. This steps is going to be important when computing co-occurrence matrices with the sliding window. The reason is that when using a sliding window we don't want to capture the end of one sentence and the beginning of the next one in the same context as they might not carry the same meaning as sentences are naturally boundaries that also we, humans, respect and take into account when reading and processing text.
+	
 	Sentence splitting has inherently similar problems as tokenization does, as punctuation signs can be ambiguous depending on the position and the tokens surrounding the punctuation sign. Apart from punctuation signs, sentences in quotation marks that are inside other sentences cause problems as such sentences are basically nested sentences. But for our purposes we don't expect to have many such examples in scientific paper abstracts.
 	
 	\subsection{MWE}
-	MWE or Multi-Word Expressions are sequences of words that when grouped together carry one meaning, but when standing alone carry another. An example of an MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting them together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning". \\
-	When dealing with scientific papers, we expect that there are going to be many MWEs and possibly new, non-existent MWEs. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep an MWE lexicon. Another solution, which was observed while inspecting the dataset is that novel MWEs are usually written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon. \\
+	MWE or Multi-Word Expressions are sequences of words that when grouped together carry one meaning, but when standing alone carry another. An example of an MWE is "deep learning". We see that the word "deep" and "learning" on their own carry other meanings in contrast when putting them together into a single phrase. For the purposes of this paper we need to keep these expressions together and not split them. The reason is that we are extracting keywords and keyphrases, and the keyphrase to be extracted from a paper that is written on the topic of "deep learning" is "deep learning", not "deep" and "learning".
+	
+	When dealing with scientific papers, we expect that there are going to be many MWEs and possibly new, non-existent MWEs. This makes the tokenization problem ever more harder because these tokens should be kept together. One solution is to again keep an MWE lexicon. In scientific papers, novel MWEs are usually written with upper-case letters and they have an abbreviation after the MWE in parenthesis (e.g. "Introduction to Large Language Models (LLMs)") and this fact can be leveraged when dealing with MWE that are not present in the MWE lexicon \cite{dataset}.
 	Let us see an example for MWE tokenization:
 	\begin{center}
 		We are discussing Machine Learning (ML) models in San Francisco. $\rightarrow$ \\
@@ -375,9 +390,10 @@
 	\end{center} 
 	
 	\subsection{Token removal based on PoS tags}
-	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. telling if a word is a noun, verb, adjective, etc. The question is why do we need this step?\\
-	The reason is the nature of the task we are doing. Namely, keywords are usually a phrase of an adjective and a noun or at most a single noun. Taking this into consideration we can substantially reduce the graph size if we just keep nouns and adjectives as the possible graph nodes. There are several ways of getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
-	We are not going into the inner workings of these methods, but we will just use an existing model for getting PoS tags. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are \textit{homographs} \footnote{Homographs are words which are spelled the same but have a different meaning.} but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
+	This step is specific for our task, but PoS (Part of Speech) is a regular NLP concept. \textbf{Part of Speech} tagging is the process of giving a grammatical category tag to words based on their syntactic and semantic meaning. Basically this step assigns syntactic tags to words i.e. telling if a word is a noun, verb, adjective, etc. 
+	
+	Keywords are usually a phrase of an adjective and a noun or at most a single noun \cite{mothe}. This assumption can substantially reduce the graph size if we just keep nouns and adjectives as the possible graph nodes. There are several ways of getting PoS tags of words, like rule-based methods, statistical methods, hybrid methods, deep learning methods, etc. 
+	We are not going into the inner workings of these methods, but we will just use an existing model for getting PoS tags \cite{pos_tags}. One of the problems when computing PoS tags is they highly depend on the context in which they occur as we can have words which are \textit{homographs} \footnote{Homographs are words which are spelled the same but have a different meaning.} but carry different PoS tags. For example the word "developed" can be a verb and an adjective at the same time as show below:
 	\begin{center}
 		Japan[Noun] developed[Verb] into[Prep.] a[Det.] developed[Adj.] nation[Noun].
 	\end{center}
@@ -395,14 +411,16 @@
 	This step will come after the token removal based on PoS tags, as stopwords could carry context specific information for PoS tagging. Even though PoS tagging should take care of stopwords, we will still include this step in case some stopword slip thorough the previous step, as it is a cheap operation.
 	
 	\subsection{Lemmatization}
-	Lemmatization is an NLP technique used to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to transfer those words to their root form. Some examples of lemmatization is show below:
+	Lemmatization is an NLP technique used to reduce words to their base form, also known as their \textit{root} or \textit{lemma}. This means that words that might be morphologically different have the same root and we want to transfer those words to their root form. Some examples of lemmatization are shown below:
 	\begin{center}
 		am, are, is $\rightarrow$ be \\
 		horses, horse, horses', horse's $\rightarrow$ horse \\
 		develops, developed, developing $\rightarrow$ develop
 	\end{center}
-	For lemmatization to be accurate, it usually uses PoS as context is important to determine the grammatical role of a word in a sentence. This step is important as the lemma of a word may vary depending on its PoS. Lemmatization will usually transform verbs, adjectives and adverbs to their base form, but if a noun is present among a set of words (e.g. "developer" in the last example) it will keep the noun how it is as nouns are usually lemmas themselves (but it will of course strip possessive or plural forms). With the use of PoS tags and grammatical rules and dictionaries, words are mapped to their lemmas. \\
-	One similar concept to lemmatization is stemming, where in the stemming process words are stripped from their suffixes and prefixes using a predefined set of rules. The problem with stemming is that it might produce non-existent words (e.g. "replacement" $\rightarrow$ "replac") which is not practical for our purposes. \\
+	For lemmatization to be accurate, it usually uses PoS as context is important to determine the grammatical role of a word in a sentence. This step is important as the lemma of a word may vary depending on its PoS. Lemmatization will usually transform verbs, adjectives and adverbs to their base form, but if a noun is present among a set of words (e.g. "developer" in the last example) it will keep the noun how it is as nouns are usually lemmas themselves (but it will of course strip possessive or plural forms) \cite{lemmatizer}. With the use of PoS tags and grammatical rules and dictionaries, words are mapped to their lemmas.
+	
+	One similar concept to lemmatization is stemming, where in the stemming process words are stripped from their suffixes and prefixes using a predefined set of rules. The problem with stemming is that it might produce non-existent words (e.g. "replacement" $\rightarrow$ "replac") which is not practical for our purposes \cite{lemmatizer}.
+	
 	The reason we need lemmatization is that words that might have different forms have to be treated as the same word as in the other case we would have two different nodes in the graph that actually represent the same word. Let us see an example of this:
 	\begin{center}
 		Graph models were used for modeling words. $\rightarrow$ Graph model be use for model word.	
@@ -418,7 +436,7 @@
 	In the normalization process we will also include the removal of punctuation signs and other non-alphanumeric sign (e.g. \#, (, ), ?), and the expansion of clitics into their expanded form (e.g. I'd $\rightarrow$ I would).
 	
 	\subsection{The pipeline}
-	Let us now combine all the steps of the NLP preprocessing pipeline into a single schema in Figure \ref{NLP_pipeline_label} for better readability.
+	We can combine all the steps of the NLP preprocessing pipeline into a single schema as shown in Figure \ref{NLP_pipeline_label} for better readability.
 	\begin{figure}[H]
 		\centering
 		\hspace*{-1.0cm}
@@ -442,7 +460,7 @@
 	\subsection{How to Represent Words as Numbers?}
 	The big challenge of any text processing on a computer is how to represent words as numbers? This is a fundamental question in NLP as computers inherently work with numbers and NLP works with words. In contrast to other areas of computer science like image processing and audio processing whose working medium (images and waveforms) can be and are represented with numbers, there is no apparent way on how to represent the working medium of NLP (words) as numbers.
 	
-	Of course, the naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. The thing is that a single number cannot meaningfully represent the essence of a word among thousands of other words. The idea is to somehow represent the features of words. For example, the features of "orange" are that it is a fruit, round, orange colored, etc. In contrast, a "banana" is also a fruit but it is curved and yellow. So in that sense, we could encode the features of words as numbers, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those word features as \textit{feature vectors} and this is the point where we come to word embeddings.
+	The naive approach would be to map each word in a language to a single number, but, for example, the word "banana" being number $134$ and the word "orange" being number $54$ doesn't tell us anything about those words or the relation between them. A single number cannot meaningfully represent the essence of a word among thousands of other words. The idea is to somehow represent the features of words. For example, the features of "orange" are that it is a fruit, round, orange colored, etc. In contrast, a "banana" is also a fruit but it is curved and yellow. So in that sense, we could encode the features of words as numbers, and measure, for instance, how much is an object round or yellow and so on. The next natural step is to encode those word features as \textit{feature vectors} and this is the point where we come to word embeddings.
 	
 	\textbf{Word embeddings} are representations of words as real-valued dense vectors such that words which are closer in such a vector space tend to have a similar meaning \cite{word-embedding-survey}. Word embeddings have revolutionized the field of NLP by enabling computers to interpret and understand words. Each entry of the embedding represents a feature of the word. These vectors are in high-dimension spaces as there are tens and even hundreds of features that words have, and they become abstract so that there is no sense in even interpreting them. The higher dimension the better representation of words we have, but there is the computational trade-off, as longer vectors required more resources to process and store. Let us look at an example of a $2$D subspace of a larger, high-dimensional space. We can see how words in such a space are behaving in terms of their embeddings in Figure \ref{subspace_label}.
 	\begin{figure}[H]
@@ -456,7 +474,7 @@
 	
 	The numbers on the Gender and Age axes are just for presentation purpose as word embeddings are usually real-valued which means they are also continuous. The reason for such a representation instead of an integer or one-hot representation is that continuous and dense vectors capture more accurate and subtle semantic relations between words. The other reason is that real-valued embeddings are more efficient for computation than other sparse representations. The vector elements are also usually in the range $[-1, 1]$ for normalization purposes when using them in neural networks. 
 	
-	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as more male (grandfather, man, boy), the higher values are regarded as more female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of a person the words have higher or lower values. We can see the power of embeddings, as the vector representation of a word does really carry meaning in such a space. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$ dimensions, will have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
+	As for the example in Figure \ref{subspace_label} we can see that for the Gender axis the lower values are regarded as more male (grandfather, man, boy), the higher values are regarded as more female (woman, girl) and the values in between have no specific gender (adult, child, infant). As for the Age axis, we have the same idea, based on the age of a person the words have higher or lower values. We can see the power of embeddings, as the vector representation of a word does really carry meaning in such a space. And if a new word would be mapped in this space, e.g. "lady" to the vector $(8, 6)$ based on how much the word is "old" or "young" and "male" or "female". We also see that words that are more similar are closer to each other in this space, and they form \textbf{clusters}. This is just a 2$D$ example of a space, but a space with, say $50$ dimensions, will have many more refined features and we can form more refined clusters (e.g. cluster of fruits which are yellow). In Figure \ref{cluster} we can see an example of different word clusters gotten from the "\textit{glove-wiki-gigaword-50}" word embedding model vectors \cite{glove}. One of the ways of obtaining these clusters is using the K-means clustering algorithm (in fact, it is the perfect example of using K-means). 
 	\begin{figure}[H]
 		\centering
 
@@ -485,7 +503,7 @@
 	\subsection{How are Word Embeddings Computed?}
 	We have seen what word embeddings are, their functionalities and how to use them, but how do we actually compute them, in an automated way? \\
 	
-	To core concept of obtaining word embeddings is that similar words occur in the same context. This means that words that are close together in a text also tend to be similar to each other. This is also known as the \textbf{distributional hypothesis}. This is a strong hypothesis but it has been proven to be viable. The most successful models for calculating word embeddings are neural network based using the context assumption. The neural networks are usually shallow as the network weights are used as the embeddings. The idea is to use a \textbf{skip-gram} model, which takes a target word and tries to predict the surrounding context words. A sliding window is used for the size of the context. Then the target word is used as the input to the neural network (actually the one hot encoded sliding window) and the preceding and succeeding words in the context are predicted as the output (which we know). The network is then trained to minimize the difference between the predicted word and actual word in the context. The network weights are adjusted during the training to improve the accuracy of the predictions using the backpropagation algorithm. The resulting weights of the hidden layer are used as the word embeddings as they capture the semantic relationships between words. This skip-gram architecture is used in Google's \textbf{word2vec} word embeddings toolkit \cite{word2vec} developed in $2013$.
+	To core concept of obtaining word embeddings is that similar words occur in the same context. This means that words that are close together in a text also tend to be similar to each other. This is also known as the \textbf{distributional hypothesis} \cite{distributional}. This is a strong hypothesis but it has been proven to be viable. The most successful models for calculating word embeddings are neural network based using the context assumption. The neural networks are usually shallow as the network weights are used as the embeddings \cite{word-embedding-survey}. The idea is to use a \textbf{skip-gram} model, which takes a target word and tries to predict the surrounding context words. A sliding window is used for the size of the context. Then the target word is used as the input to the neural network (actually the one hot encoded sliding window) and the preceding and succeeding words in the context are predicted as the output (which we know). The network is then trained to minimize the difference between the predicted word and actual word in the context. The network weights are adjusted during the training to improve the accuracy of the predictions using the backpropagation algorithm. The resulting weights of the hidden layer are used as the word embeddings as they capture the semantic relationships between words \cite{word-embedding-survey}. This skip-gram architecture is used in Google's \textbf{word2vec} word embeddings toolkit \cite{word2vec} developed in $2013$.
 	% https://medium.com/@corymaklin/word2vec-skip-gram-904775613b4c
 	% https://www.turing.com/kb/guide-on-word-embeddings-in-nlp
 	
@@ -496,12 +514,12 @@
 	Some apparent problems using word embeddings as they were described are:
 	\begin{enumerate}
 		\item How to embed phrases (or MWE)?\\
-		When training the network on target words, we can define \textit{target phrases} instead of words. There is actually a model called phrase2vec exclusively built for phrase embedding. There are also models which can embed sentences as vectors, so we can treat sentences as phrases.
+		When training the network on target words, we can define \textit{target phrases} instead of words. A model called phrase2vec \cite{phrase2vec} exclusively built for phrase embedding. There are also models which can embed sentences as vectors, so we can treat sentences as phrases.
 		\item How to deal with homonymy (words with different meaning but written the same)? \\
 		To overcome this problem, \textit{multi-sense} embeddings can be used, where a word can be mapped to more embeddings considering a word's context \cite{multi_sense_we}. 
 	\end{enumerate}
 	
-	Let us also explain how are we going to use word embeddings in the graph model. Once the graph is built, with words as nodes and the edges as connections between the words (gotten from the co-occurrence matrix which will be explained in the next chapter), we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two adjacent nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
+	Once the graph is built, with words as nodes and the edges as connections between the words gotten from the co-occurrence matrix, we can alter the weights of the edges by multiplying them with the cosine similarity of the embeddings between two adjacent nodes. In this way we aim to strengthen (or loosen) the semantic link between words.
 	
 	
 	\newpage
@@ -529,7 +547,7 @@
 	% https://www.baeldung.com/cs/co-occurrence-matrices
 	A \textbf{co-occurrence matrix} in NLP is a matrix that represents the frequency of word co-occurrences within a specified context window for a given text. The idea is to capture how often words appear together in similar contexts. For a given context window size we see how many pair-wise combinations there are. Each row and column of the matrix corresponds to a unique word in the vocabulary \footnote{Set of unique words in a corpus also knows as \textit{types}} and the matrix elements contain the count of pair-wise word occurrences. 
 	
-	One thing to address, is that will respect sentence boundaries, so that the context window cannot be present across two or more sentences but just one. The reason is that adjacent sentences might not refer to the same context so it is better to analyze them independently. In Figure \ref{NLP_pipeline_label} the output text is assumed to be a set of tokenized sentences, which means that for each sentence after the sentence splitting module we perform all the steps and get all the tokens per sentence.
+	We will respect sentence boundaries, so that the context window cannot be present across two or more sentences but just one. The reason is that adjacent sentences might not refer to the same context so we will analyze them independently. In Figure \ref{NLP_pipeline_label} the output text is assumed to be a set of tokenized sentences, which means that for each sentence after the sentence splitting module we perform all the steps and get all the tokens per sentence.
 	
 	Let us look at an example set of sentences, for which we are going to perform the NLP pipeline, perform the context window sliding with a window size of $3$ words and show the co-occurrence matrix.
 	
@@ -545,7 +563,7 @@
 		\label{co_matrix_construction}
 	\end{figure}
 	
-	The last step left to do is to transform the co-occurrence matrix into a graph. The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. One thing to note is that the co-occurrence matrix in the Figure \ref{co_matrix_construction} is sparse, so for memory purposes, we actually store the adjacency matrix as a dictionary (a version of the adjacency list) where the keys are the pair-wise word occurrences and the values are the number of co-occurrences (the graph weights).
+	The co-occurrence matrix is in a one-to-one relationship to a graph's adjacency matrix so we can get a graph representation directly from the co-occurrence matrix. One thing to note is that the co-occurrence matrix in the Figure \ref{co_matrix_construction} is sparse, so for memory purposes, we actually store the adjacency matrix as a dictionary (a version of the adjacency list) where the keys are the pair-wise word occurrences and the values are the number of co-occurrences (the graph weights).
 	In Figure \ref{graph_example} we can see the graph representation of the example above.
 	
 	\begin{figure}[H]
@@ -559,7 +577,7 @@
 	Just by looking at the graph we can observe that "japan" has the most edge connections. We can also see the semantic relationship between words and their respective strength like (japan, country, $2$), (sushi, fish, $1$), (rice, food, $1$), etc.
 	
 	The last step in the graph construction is to encode the word-embedding values in the graph. It is enough to find the cosine-similarity between adjacent nodes and multiply the edge weight with the value of the similarity between words.
-	We can now visualize the whole keyword extraction pipeline.
+	We can now visualize the whole keyword extraction pipeline in Figure \ref{full_pipeline}.
 	
 	\begin{figure}[H]
 		\centering
@@ -569,11 +587,13 @@
 		\caption{Full pipeline of keyword extraction}
 		\label{full_pipeline}
 	\end{figure}
-	We can see that the last block before obtaining the keywords is the \textit{ranking algorithm}. In the next chapter we will discuss how to rank nodes in a graph based on different graph features, whose output are going to be the keywords.
+	
+%	We can see that the last block before obtaining the keywords is the \textit{ranking algorithm}. In the next chapter we will discuss how to rank nodes in a graph based on different graph features, whose output are going to be the keywords.
 	
 	\newpage
 	\section{Implementation of Keyword Extraction from Graphs}
-	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important nodes i.e. keywords, based on some metrics. There are many different ranking algorithms to rank graph nodes, which take into account node connections, edge number, edge weights, etc. We will take a look at some of them and in the next section we will carry out tests so we can compare how they perform. Let us now explore these ranking algorithms.
+	The last, and frankly, most important step is the actual ranking of the words in the graph. Based on this ranking we will get the most important nodes. There are many different ranking algorithms to rank graph nodes, which take into account node connections, edge number, edge weights, etc. 
+	
 	\subsection{Degree centrality}
 	Degree centrality is a measure that quantifies the importance of nodes in a graph based on the number of edges connected to them \cite{networkx_centrality}. The number of edges connected to a node in a graph is called it's \textit{degree}. The degree of a node can also be thought of as the number of non-zero values in the row or column of the given node in the adjacency matrix. The formula for degree centrality is given as:
 	\begin{equation}
@@ -589,7 +609,7 @@
 	\begin{equation}
 		C_c(v) = \frac{|\mathcal{V}|-1}{\sum_{u=1}^{|\mathcal{V}|} d(u,v)}
 	\end{equation}
-	where $d(u,v)$ is the shortest distance between nodes $u$ and $v$. When talking about the distance between two adjacent nodes, that distance is the edge weight. So, the shortest distance between any two nodes is the set of edges which connect the two nodes such that the sum of their weights is minimal. The most famous algorithm used for finding the shortest distance between two nodes in a graph is Dijkstra's algorithm. In the case that the graph in not completely connected, the closeness centrality would be computed for each connected part separately and then scaled by the size of that part. 
+	where $d(u,v)$ is the shortest distance between nodes $u$ and $v$. When talking about the distance between two adjacent nodes, that distance is the edge weight. So, the shortest distance between any two nodes is the set of edges which connect the two nodes such that the sum of their weights is minimal. The most famous algorithm used for finding the shortest distance between two nodes in a graph is Dijkstra's algorithm \cite{dijkstra}. In the case that the graph in not completely connected, the closeness centrality would be computed for each connected part separately and then scaled by the size of that part. 
 	
 	In Figure \ref{graph_adjacency} the shortest distance between nodes $A$ and $E$ is $2$ along the path $A - D - E$ even though from the figure it might look like it is the path $A - B - E$ but that path has a distance of $3$. We can calculate the closeness centrality for "japan" in Figure \ref{graph_example}: 
 	\begin{equation*}
@@ -633,7 +653,7 @@
 	When it comes to text, words with high betweenness scores act as "bridges" or "connectors" between different parts of text, as they might appear in position which link distinct text concepts. On the other hand, words with low scores may be isolated or play a more local role on a sentence or phrase level rather than a text level.
 	
 	\subsection{Eigenvector centrality}
-	Eigenvector centrality is a measure of the importance of a node in a graph, taking into account both its direct connections to other nodes, and the connections of its neighbors. A node has a high eigenvector centrality score if it is connected to other nodes that have a high score. The eigenvector score of node \textit{i} is defined as the sum of the scores of its neighbors multiplied by the edge weights and scaled by a factor $\lambda$. Let $\mathbf{A}$ be the adjacency matrix of a graph $\mathcal{G}$, where the entry $a_{v,t}$ of $\mathbf{A}$ is the edge weight between nodes $v$ and $t$ then the centrality score $x_v$ of node $v$ is defined as:
+	Eigenvector centrality is a measure of the importance of a node in a graph, taking into account both its direct connections to other nodes, and the connections of its neighbors \cite{networkx_centrality}. A node has a high eigenvector centrality score if it is connected to other nodes that have a high score. The eigenvector score of node \textit{i} is defined as the sum of the scores of its neighbors multiplied by the edge weights and scaled by a factor $\lambda$. Let $\mathbf{A}$ be the adjacency matrix of a graph $\mathcal{G}$, where the entry $a_{v,t}$ of $\mathbf{A}$ is the edge weight between nodes $v$ and $t$ then the centrality score $x_v$ of node $v$ is defined as:
 	\begin{equation}\label{eigenvector_1}
 		x_v = \frac{1}{\lambda} \sum_{t \in \mathcal{V}} a_{v,t} x_t
 	\end{equation}
@@ -643,7 +663,7 @@
 	\end{equation}
 	which is the definition of an eigenvector, hence the name eigenvector centrality. The scaling factor $\lambda$ is the eigenvalue assigned to the eigenvector. The number of eigenvalues for the adjacency matrix $\mathbf{A}$ is going to be the number of nodes $|\mathcal{V}|$, so which one do we choose?
 	
-	The centrality score of the \textit{i}-th node is obtained as the \textit{i}-th component of the eigenvector $\mathbf{x}$ with the highest eigenvalue $\lambda$ (also called the \textit{dominant eigenvector}). This condition of using the dominant eigenvector for the scores comes from the fact that the scores have to be positive. \footnote{By the Perron-Frobenius theorem a real square matrix with positive entries has a unique eigenvalue of largest magnitude and the eigenvalue is real. The corresponding eigenvector can be chosen to have strictly positive components.} The eigenvector is defined up to the eigenvalue $\lambda$, so only the ratios of the centralities of the nodes are well defined. We can go a step further to make sure that the scores are in the range $[0, 1]$ by using the unit vector $\mathbf{x}/||\mathbf{x}||$. Let us demonstrate this ranking algorithm on the graph in Figure \ref{graph_adjacency} where we get that the dominant eigenvector is:
+	The centrality score of the \textit{i}-th node is obtained as the \textit{i}-th component of the eigenvector $\mathbf{x}$ with the highest eigenvalue $\lambda$ (also called the \textit{dominant eigenvector}). This condition of using the dominant eigenvector for the scores comes from the fact that the scores have to be positive \cite{networkx_centrality}. \footnote{By the Perron-Frobenius theorem a real square matrix with positive entries has a unique eigenvalue of largest magnitude and the eigenvalue is real. The corresponding eigenvector can be chosen to have strictly positive components.} The eigenvector is defined up to the eigenvalue $\lambda$, so only the ratios of the centralities of the nodes are well defined. We can go a step further to make sure that the scores are in the range $[0, 1]$ by using the unit vector $\mathbf{x}/||\mathbf{x}||$. Let us demonstrate this ranking algorithm on the graph in Figure \ref{graph_adjacency} where we get that the dominant eigenvector is:
 	$$ \mathbf{x} = 
 	\begin{bmatrix}
 		2.738 & 1.087 & 2.887 & 2.183 & 1
@@ -656,7 +676,7 @@
 	$$ x_C = \frac{1}{\lambda} (a_{C,A}x_A + a_{C, D}x_D) = \frac{3 \cdot 0.574 + 2 \cdot 0.457}{4.358} = 0.605 = x_C $$
 	From the graph in Figure \ref{graph_adjacency} we can see that even though the node $C$ is not central it has a high score as it is connected to nodes which have a high score and are central. 
 	
-	The usual way to calculate eigenvalues are using the \textit{characteristic polynomial} as $\det(A-\lambda I) = 0$ but we do not need all the eigenvalues, just the one with the largest magnitude. Taking this into account, in practice when calculating the dominant eigenvector the \textbf{power iteration} algorithm is used. It is an iterative algorithm which returns the eigenvalue $\lambda$ which is the greatest eigenvalue of $A$ in magnitude and the eigenvector $\mathbf{x}$ assigned to it. The iterative recurrence relation is defined as:
+	The usual way to calculate eigenvalues are using the \textit{characteristic polynomial} as $\det(A-\lambda I) = 0$ but we do not need all the eigenvalues, just the one with the largest magnitude. Taking this into account, in practice when calculating the dominant eigenvector the \textbf{power iteration} algorithm \cite{networkx_centrality} is used. It is an iterative algorithm which returns the eigenvalue $\lambda$ which is the greatest eigenvalue of $A$ in magnitude and the eigenvector $\mathbf{x}$ assigned to it. The iterative recurrence relation is defined as:
 	\begin{equation}
 		\mathbf{b}_{k+1} = \frac{\mathbf{A}\mathbf{b}_{k}}{|| \mathbf{A}\mathbf{b}_{k}||}
 	\end{equation}
@@ -756,11 +776,11 @@
 	\end{table}
 	We can see that word rankings are mostly consistent throughout all the algorithms. The words "japan", "fish", "great", "sea" and "country" are the words with the highest ranks and they do really convey the meaning of the example sentences. The words "japan" and "fish" were acting as some kind of connectors between sentences they get high rankings. Other words that happened to be in the same context as those high scoring words have also gotten higher rankings (e.g. "great" and "sea"). 
 	
-	With this overview we can see the potential of modeling text as graphs, especially as the methods are unsupervised and fairly easy to implement. In the next chapter we will test the ranking algorithms on real data and see how they perform.
+	With this overview we can see the potential of modeling text as graphs, especially as the methods are unsupervised and fairly easy to implement.
 	
 	\newpage
 	\section{Experiments and Results}
-	In this section we will perform tests on a dataset of scientific paper abstracts. We will define the metrics used to evaluate the model and in the end we will see the obtained results and discuss them. Let us firstly look at the dataset used.
+	In this section we will perform tests on a dataset of scientific paper abstracts. We will define the metrics used to evaluate the model and in the end we will see the obtained results and discuss them. 
 	
 	\subsection{Dataset}
 	We already mentioned in the Introduction section that the thesis will focus on the keyword extraction from scientific paper abstracts, more precisely computer science papers. Apart from the paper abstracts, we would also need the \textit{ground truth} labels i.e. the human assigned keywords to be able to test the keyword extraction pipeline. A good place to get both, the abstracts and keywords is the IEEE Xplore digital library \footnote{IEEE Xplore digital library is a research database for discovery and access to journal articles, conference proceedings, technical standards, and related materials on computer science, electrical engineering and electronics, and similar fields.} \cite{ieeexplore}. 
@@ -807,7 +827,7 @@
 	\subsection{Testing}
 	Before discussing the testing results let us address some key elements of keyword extraction:
 	\begin{itemize}
-		\item All the development and testing were done in Python. The co-occurrence matrix construction was written from scratch. The NLP pipeline was built using the \textit{nltk} library with some specific blocks built from scratch (e.g. the sliding window). The graph and ranking algorithms were built from the \textit{networkx} library. The word embedding "\textit{glove-wiki-gigaword-50}" model from the \textit{gensim} library was used, with $50$ dimensional vectors.
+		\item All the development and testing were done in Python. The co-occurrence matrix construction was written from scratch. The NLP pipeline was built using the \textit{nltk} library with some specific blocks built from scratch (e.g. the sliding window). The graph and ranking algorithms were built from the \textit{networkx} library. The word embedding "\textit{glove-wiki-gigaword-50}" model \cite{glove} from the \textit{gensim} library was used, with $50$ dimensional vectors.
 		\item The human assigned keywords can be subjective and most importantly they can be human generated, so the maximum achievable results when comparing the to the human assigned keywords are less than 100\%.
 		\item The expected precision, recall and F-score should be in the range $10 - 40 \%$ as presented in these papers \cite{ying_yan}, \cite{mothe}, \cite{keyword-extraction-0}, \cite{textrank}.
 		\item When using the cosine similarity in word embeddings, negative values may arise, and for some of the ranking algorithms we require positive weights (e.g. for path finding). To solve this issue, all the edge weights in a graph were offset by the absolute value of the minimum weight value, so that we only deal with positive values.
@@ -815,7 +835,7 @@
 	\end{itemize}	
 	The final, macro-averaged, results are shown in Table \ref{tab:main_table}. For all the $5000$ papers, the precision, recall and F-score were computed after which they were averaged. The hyperparameter that was changed was the the window size, so for three different values of the window size, we can see the keyword extraction results. 
 	
-	We can observe that the computed results are in the expected range that other papers have obtained. One unexpected result is that changing the window size didn't have much of an impact. The reason for this is how we implemented the sliding window, namely that the sliding window doesn't cross sentences and if sentences are not long, changing the window size will not have much of an impact. Still, we can observe a slight decrease in performance when increasing window size which was also observed in \cite{textrank}. The explanation is, when using larger window sizes we can capture more context but it might also introduce noise, by including less relevant words, diluting the meaningful co-occurrence patterns, which could lead to a decrease in precision and recall. 
+	We can observe that the computed results are in the expected range that other papers have obtained. One unexpected result is that changing the window size didn't have much of an impact on the metrics. The reason for this is the implementation of the sliding window. The sliding window doesn't cross sentences and if sentences are not long, changing the window size will not have much of an impact. Nonetheless, we can observe a slight decrease in performance when increasing window size which was also observed in \cite{textrank}. The explanation is, when using larger window sizes we can capture more context but it might also introduce noise, by including less relevant words, diluting the meaningful co-occurrence patterns, which could lead to a decrease in precision and recall. 
 	
 	\begin{table}[H] 
 		\caption{Keyword extraction results for precision recall and F-score for different window sizes.}
@@ -849,15 +869,14 @@
 
 	\newpage
 	\section{Conclusion}
-	In this thesis work, we tackled the problem of automatic keyword extraction using graph-based methods and word embeddings. The problem was narrowed down to extract keywords from paper abstracts in the domain of computer science. The foundation of the used approach lays in constructing a graph representation of the co-occurrence relationships among nouns and adjectives within paper abstracts, leveraging the robustness of word embeddings. After building the graph representation of the paper abstracts, various centrality measures for graphs were used to rank the words in the abstract. The measures used were: Degree Centrality, Closeness Centrality, Betweenness Centrality, Eigenvector Centrality and PageRank. Each algorithm brought a unique perspective to the identification of significant words, offering a nuanced understanding of their importance within the context of the given abstracts.
+	In this thesis work, we tackled the problem of automatic keyword extraction using graph-based methods and word embeddings. The problem was narrowed down to extract keywords from paper abstracts in the domain of computer science. The foundation of the used approach lays in constructing a graph representation of the co-occurrence relationships among nouns and adjectives within paper abstracts, leveraging the robustness of word embeddings. After building the graph representation of the paper abstracts, various centrality measures for graphs were used to rank the words in the abstract. The measures used were: Degree Centrality, Closeness Centrality, Betweenness Centrality, Eigenvector Centrality and PageRank. Each algorithm brought a perspective to the identification of keywords, offering a nuanced understanding of their importance within the context of the given abstracts.
 	
-	The evaluation of the model's performance incorporated fundamental metrics such as precision, recall, and F-score. Macro-averaging, accounting for variations in abstract characteristics, provided a comprehensive view of the model's generalization capabilities. The observed results, falling within the range of outcomes reported in existing literature on this topic, prove the concept of using the ranking algorithms for keyword extraction. The best results were observed for the PageRank algorithm, more specifically the text version of it. 
+	The evaluation of the model's performance incorporated fundamental metrics such as precision, recall, and F-score. Macro-averaging, accounting for variations in abstract characteristics, provided a comprehensive view of the model's performance. The observed results, falling within the range of outcomes reported in existing literature on this topic, prove the concept of using the ranking algorithms for keyword extraction. The best results were observed for the PageRank algorithm, more specifically the text version of it. 
 	
-	While the model exhibits promising results, it is essential to acknowledge its limitations. Factors such as domain-specific nuances and the inherent ambiguity of language pose challenges that call for further investigation. Future research endeavors could dive deeper into these challenges, refining the model to accommodate varying linguistic contexts and enhancing its adaptability across different datasets.
+	While the model exhibits promising results, it is essential to acknowledge its limitations. Factors such as domain-specific nuances and the inherent ambiguity of language pose challenges that call for further investigation. Future research endeavors could dive deeper into these challenges, enhancing its adaptability across different datasets.
 	
 	The most promising features of using a graph-based model, is that it is unsupervised and fast. The swift nature of the model aligns with the practical demands of real-world applications, where efficiency and autonomy are paramount. It most certainly can be used as a particularly good initial guess when doing information retrieval. 
-	
-	In conclusion, this thesis highlights the importance of harnessing unsupervised graph-based methods for keyword extraction, providing a scalable and adaptable solution for real-world applications. As we look ahead, there is potential for further refinement and expansion of this approach, ensuring its continued relevance and utility in an ever-evolving landscape of textual data.
+	In conclusion, this thesis highlights the importance of harnessing unsupervised graph-based methods for keyword extraction, providing a scalable and adaptable solution for real-world applications. 
 	
 
 	
@@ -875,13 +894,37 @@
 		Lin, Tianyang, et al. "\textit{A survey of transformers}". AI Open (2022).\\
 		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/pii/S2666651022000146}
 		
+		\bibitem{great_transformer}
+		Luitse, Dieuwertje, and Wiebke Denkena. "\textit{The great transformer: Examining the role of large language models in the political economy of AI}." Big Data \& Society (2021).\\
+		\texttt{URL: }\url{https://journals.sagepub.com/doi/pdf/10.1177/20539517211047734}
+		
 		\bibitem{keyword-extraction-0}
 		Zu, Xian, Fei Xie, and Xiaojian Liu. "\textit{Graph-based keyphrase extraction using word and document embeddings}". IEEE International Conference on Knowledge Graph (ICKG) (2020). \\
 		\texttt{URL: }\url{https://ieeexplore.ieee.org/abstract/document/9194571}
 		
+		\bibitem{distributional}
+		Sahlgren, Magnus. "\textit{The distributional hypothesis}." Italian Journal of Disability Studies 20 (2008). \\
+		\texttt{URL: }\url{https://www.diva-portal.org/smash/get/diva2:1041938/FULLTEXT01.pdf}
+		
 		\bibitem{stanford_NLP}
 		The Stanford NLP Group\\
 		\texttt{URL: }\url{https://nlp.stanford.edu/}
+		
+		\bibitem{tokenizer}
+		The nltk Penn Treebank tokenizer. \\
+		\texttt{URL: }\url{https://www.nltk.org/api/nltk.tokenize.TreebankWordTokenizer.html}
+		
+		\bibitem{penn}
+		The Penn Treebank. \\
+		\texttt{URL: }\url{https://catalog.ldc.upenn.edu/LDC99T42}
+		
+		\bibitem{pos_tags}
+		The nltk PoS tagger. \\
+		\texttt{URL: }\url{https://www.nltk.org/api/nltk.tag.pos_tag.html}
+		
+		\bibitem{lemmatizer}
+		Plisson, Joël, Nada Lavrac, and Dunja Mladenic. "\textit{A rule based approach to word lemmatization}." In Proceedings of IS (2004). \\
+		\texttt{URL: }\url{https://eprints.um.edu.my/13423/1/rp030_I3007.pdf}
 		
 		\bibitem{word2vec}
 		Word2Vec project information\\
@@ -895,12 +938,20 @@
 		Ruas, T., Grosky, W. and Aizawa, A.  "\textit{Multi-sense embeddings through a word sense disambiguation process}". Expert Systems with Applications,  (2019). \\
 		\texttt{URL: }\url{https://arxiv.org/pdf/2101.08700.pdf}
 		
+		\bibitem{phrase2vec}
+		Wu, Yongliang, Shuliang Zhao, and Wenbin Li. "\textit{Phrase2Vec: phrase embedding based on parsing}." Information Sciences (2020). \\
+		\texttt{URL: }\url{https://www.sciencedirect.com/science/article/abs/pii/S0020025519311429}
+		
 		\bibitem{juricGrafovi}
 		Jurić Ž. "\textit{Diskretna matematika za studente tehničkih nauka}". ETF Sarajevo, UNSA, (2017). 
 		
 		\bibitem{networkx_centrality}
 		NetworkX Library documentation\\
 		\texttt{URL: }\url{https://networkx.org/documentation/stable/reference/algorithms/}
+		
+		\bibitem{dijkstra}
+		Dijkstra, Edsger W. "\textit{A note on two problems in connexion with graphs}." In Edsger Wybe Dijkstra: His Life, Work, and Legacy (2022). \\
+		\texttt{URL: }\url{https://hal.science/hal-03171590/document}
 		
 		\bibitem{bavelas}
 		Bavelas, Alex. "\textit{Communication patterns in task‐oriented groups}". The journal of the acoustical society of America (1950). \\
