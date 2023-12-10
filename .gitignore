@@ -31,3 +31,5 @@ data_cleanup.ipynb
 *xlsx
 *json
 *docx
+*.nav
+*.snm
