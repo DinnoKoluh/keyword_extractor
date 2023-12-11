@@ -8,6 +8,12 @@
 \usepackage{amsmath}
 \usepackage{bm}  %mogu pisati boldirane formule sa simbolima
 
+\usepackage{makecell}
+\usepackage{hhline}
+\usepackage{array} %za tabele
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{multirow}
+
 %\usepackage{caption}
 %\usepackage{subcaption}
 \usepackage[utf8]{inputenc}
@@ -68,7 +74,7 @@
 
 %Information to be included in the title page:
 
-\title{Graph-Based Keyword Extraction fromScientific Paper Abstracts using Word Embeddings}
+\title{Graph-Based Keyword Extraction from Scientific Paper Abstracts using Word Embeddings}
 %c\date{Juni 2020. godine}
 
 \settowidth{\leftmargini}{\usebeamertemplate{itemize item}}
@@ -126,10 +132,16 @@
 			\item Why model the problem as a graph?
 			\begin{itemize}
 				\item Well-established model
-				\item Model text as a graph
+				\item Model text as a graph (nodes and edges)
 				\item Ranking algorithms
+				\item Unsupervised
 			\end{itemize}
 			\item The role of word embeddings
+			\item Goal of thesis:
+			\begin{itemize}
+				\item Verify results from available literature
+				\item Get insights in the area of information retrieval
+			\end{itemize}
 		\end{itemize}
 	\end{frame}
 
@@ -141,7 +153,7 @@
 				\centering
 				\includegraphics[scale=0.50]{NLP_pipeline}		
 				%\captionsetup{justification=centering}
-				\caption{The NLP pipeline}
+				\caption{The NLP pipeline.}
 				\label{NLP_pipeline_label}
 			\end{figure}
 		\end{itemize}
@@ -158,7 +170,7 @@
 					\centering
 					\includegraphics[scale=0.45]{context_diagram_horizontal}		
 					%\captionsetup{justification=centering}
-					\caption{Co-occurrence matrix construction}
+					\caption{Co-occurrence matrix construction.}
 					\label{context_diagram_horizontal}
 				\end{figure}
 			\end{onlyenv}
@@ -170,7 +182,7 @@
 					\centering
 					\includegraphics[scale=0.40]{graph_example}		
 					%\captionsetup{justification=centering}
-					\caption{Graph representation of the co-occurrence matrix}
+					\caption{Graph representation of the co-occurrence matrix.}
 					\label{}
 				\end{figure}
 			\end{onlyenv}
@@ -190,8 +202,38 @@
 		\end{onlyenv}
 	
 		\begin{onlyenv}<2-2>
-			\item Application on examples sentences:
-			\item TABLE
+%			The island country of Japan has developed into a great economy after World War 2. The Japan sea is a source of fish. Sushi is a famous fish and rice food. \\
+				\begin{figure}[H]
+					\vspace{-0.4cm}
+					\centering
+					\includegraphics[scale=0.60]{japan}		
+				\end{figure}
+			\begin{table}[H]
+				\vspace{-0.5cm}
+				\label{table1}
+				\centering
+				\caption{Ranking values.}
+				\scalebox{0.55}{
+					\begin{tabular}{|cc|cc|cc|cc|cc|}
+						\hline
+						\multicolumn{2}{|c|}{Degree Centrality}      & \multicolumn{2}{c|}{Closeness Centrality}   & \multicolumn{2}{c|}{Betweenness Centrality} & \multicolumn{2}{c|}{Eigenvector Centrality} & \multicolumn{2}{c|}{PageRank}                \\ \hline
+						\multicolumn{1}{|c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking & \multicolumn{1}{c|}{Word}          & Ranking \\ \hline
+						\multicolumn{1}{|c|}{japan}         & 0.5     & \multicolumn{1}{c|}{japan}         & 0.462   & \multicolumn{1}{c|}{japan}         & 0.566   & \multicolumn{1}{c|}{japan}         & 0.515   & \multicolumn{1}{c|}{fish}          & 0.148   \\ \hline
+						\multicolumn{1}{|c|}{fish}          & 0.5     & \multicolumn{1}{c|}{source}        & 0.444   & \multicolumn{1}{c|}{fish}          & 0.505   & \multicolumn{1}{c|}{great}         & 0.431   & \multicolumn{1}{c|}{japan}         & 0.148   \\ \hline
+						\multicolumn{1}{|c|}{great}         & 0.333   & \multicolumn{1}{c|}{sea}           & 0.444   & \multicolumn{1}{c|}{source}        & 0.227   & \multicolumn{1}{c|}{country}       & 0.33    & \multicolumn{1}{c|}{great}         & 0.111   \\ \hline
+						\multicolumn{1}{|c|}{country}       & 0.25    & \multicolumn{1}{c|}{fish}          & 0.429   & \multicolumn{1}{c|}{sea}           & 0.227   & \multicolumn{1}{c|}{economy}       & 0.309   & \multicolumn{1}{c|}{famous}        & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{famous}        & 0.25    & \multicolumn{1}{c|}{island}        & 0.353   & \multicolumn{1}{c|}{economy}       & 0.129   & \multicolumn{1}{c|}{fish}          & 0.279   & \multicolumn{1}{c|}{rice}          & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{rice}          & 0.25    & \multicolumn{1}{c|}{economy}       & 0.353   & \multicolumn{1}{c|}{food}          & 0.068   & \multicolumn{1}{c|}{source}        & 0.27    & \multicolumn{1}{c|}{source}        & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{source}        & 0.25    & \multicolumn{1}{c|}{food}          & 0.333   & \multicolumn{1}{c|}{sushi}         & 0.068   & \multicolumn{1}{c|}{sea}           & 0.27    & \multicolumn{1}{c|}{sea}           & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{sea}           & 0.25    & \multicolumn{1}{c|}{sushi}         & 0.333   & \multicolumn{1}{c|}{island}        & 0.064   & \multicolumn{1}{c|}{island}        & 0.171   & \multicolumn{1}{c|}{country}       & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{economy}       & 0.25    & \multicolumn{1}{c|}{great}         & 0.3     & \multicolumn{1}{c|}{great}         & 0.03    & \multicolumn{1}{c|}{famous}        & 0.164   & \multicolumn{1}{c|}{economy}       & 0.074   \\ \hline
+						\multicolumn{1}{|c|}{food}          & 0.167   & \multicolumn{1}{c|}{world\_war\_2} & 0.293   & \multicolumn{1}{c|}{country}       & 0.023   & \multicolumn{1}{c|}{rice}          & 0.164   & \multicolumn{1}{c|}{food}          & 0.037   \\ \hline
+						\multicolumn{1}{|c|}{sushi}         & 0.167   & \multicolumn{1}{c|}{country}       & 0.293   & \multicolumn{1}{c|}{famous}        & 0.015   & \multicolumn{1}{c|}{world\_war\_2} & 0.15    & \multicolumn{1}{c|}{sushi}         & 0.037   \\ \hline
+						\multicolumn{1}{|c|}{island}        & 0.167   & \multicolumn{1}{c|}{famous}        & 0.273   & \multicolumn{1}{c|}{rice}          & 0.015   & \multicolumn{1}{c|}{food}          & 0.09    & \multicolumn{1}{c|}{island}        & 0.037   \\ \hline
+						\multicolumn{1}{|c|}{world\_war\_2} & 0.167   & \multicolumn{1}{c|}{rice}          & 0.273   & \multicolumn{1}{c|}{world\_war\_2} & 0.011   & \multicolumn{1}{c|}{sushi}         & 0.09    & \multicolumn{1}{c|}{world\_war\_2} & 0.037   \\ \hline
+					\end{tabular}
+				}
+			\end{table}
 		\end{onlyenv}
 
 		\begin{onlyenv}<3-3>
@@ -216,9 +258,9 @@
 			\begin{onlyenv}<1-1>
 			\item Dataset: 5000 computer science paper abstracts with human assigned keywords, scraped from IEEE Xplore digital library
 			\item Standard evaluation metrics (precision, recall, F-score)
-			\item Important to address
+			\item Important to address:
 			\begin{itemize}
-				\item Human assigned keywords are subjective and can be generated
+				\item Human assigned keywords are subjective and can be human-generated
 				\item Expected precision, recall and F-score from available literature in the range of $10 - 40 \%$
 				\item Selecting the top \textit{n} keywords calculated by the model, where
 				$ n $ is the number of true keywords from the dataset  
@@ -226,23 +268,38 @@
 			\end{onlyenv}
 		
 			\begin{onlyenv}<2-2>
-				\item TABLE
+
+				\begin{table}[H] 
+					\caption{Keyword extraction results for precision recall and F-score for different window sizes.}
+					\label{tab:main_table}
+					\hspace*{-1cm}
+					\resizebox{\columnwidth}{!}{
+					\renewcommand\arraystretch{1.2}
+					\begin{tabular}{|c|c|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|>{\centering\arraybackslash}p{3cm}|}
+						\hline
+						Window   Size       & Ranking   Algorithm    & Precision (\%) & Recall (\%) & F-score (\%) \\ \Xcline{1-5}{0.75mm}
+						\multirow{5}{*}{3}  & Degree Centrality      & 29.37          & 33.19       & 31.16        \\ \cline{2-5} 
+						& Closeness Centrality   & 25.33          & 28.62       & 26.87        \\ \cline{2-5} 
+						& Betweenness Centrality & 25.83          & 29.17       & 27.39        \\ \cline{2-5} 
+						& Eigenvector Centrality & 27.99          & 31.64       & 29.70        \\ \cline{2-5} 
+						& PageRank               & \textbf{29.60}          & \textbf{33.45}       & \textbf{31.40}        \\ \Xcline{1-5}{0.75mm}
+						\multirow{5}{*}{5}  & Degree Centrality      & 29.38          & 33.20       & 31.17        \\ \cline{2-5} 
+						& Closeness Centrality   & 24.93          & 28.16       & 26.45        \\ \cline{2-5} 
+						& Betweenness Centrality & 25.66          & 28.98       & 27.21        \\ \cline{2-5} 
+						& Eigenvector Centrality & 27.93          & 31.57       & 29.63        \\ \cline{2-5} 
+						& PageRank               & 29.37          & 33.19       & 31.16        \\ \Xcline{1-5}{0.75mm}
+						\multirow{5}{*}{10} & Degree Centrality      & 28.55          & 32.26       & 30.28        \\ \cline{2-5} 
+						& Closeness Centrality   & 24.03          & 27.13       & 25.48        \\ \cline{2-5} 
+						& Betweenness Centrality & 25.31          & 28.58       & 26.84        \\ \cline{2-5} 
+						& Eigenvector Centrality & 24.34          & 27.49       & 25.81        \\ \cline{2-5} 
+						& PageRank               & 28.57          & 32.28       & 30.31        \\ \Xcline{1-5}{0.75mm}
+					\end{tabular}
+				}
+				\end{table}
 			\end{onlyenv}
 		\end{itemize}
 	\end{frame}
-	
-%		\begin{itemize}
-%	\item<1-> Težinska funkcija 
-%	\begin{onlyenv}<1-3>
-%		\begin{gather}\label{defineCostFunction}
-%			f_c: \mathcal{C} \rightarrow \mathbb{R}_+ \\
-%			f_c(\bm{q}) = c
-%		\end{gather}
-%	\end{onlyenv}
-%	\item<2-> Težinska mapa
-%	\item<3-> Kriteriji težinskih funkcija
-%	
-%\end{itemize}
+
 	
 	
 	\begin{frame}
