@@ -129,14 +129,19 @@
 				\item Inherently a ranking problem
 			\end{itemize}
 			\item Application to scientific paper abstracts
+			\item Using LLM's
+			\begin{itemize}
+				\item Covers human generated keywords
+				\item Drawbacks: expensive operations, data-intensive, storage-intensive
+			\end{itemize}
 			\item Why model the problem as a graph?
 			\begin{itemize}
 				\item Well-established model
 				\item Model text as a graph (nodes and edges)
 				\item Ranking algorithms
-				\item Unsupervised
+				\item Good representation for unsupervised methods
 			\end{itemize}
-			\item The role of word embeddings
+			
 			\item Goal of thesis:
 			\begin{itemize}
 				\item Verify results from available literature
@@ -258,12 +263,14 @@
 			\begin{onlyenv}<1-1>
 			\item Dataset: 5000 computer science paper abstracts with human assigned keywords, scraped from IEEE Xplore digital library
 			\item Standard evaluation metrics (precision, recall, F-score)
+			\item The role of word embeddings: no remarkable impact
 			\item Important to address:
 			\begin{itemize}
 				\item Human assigned keywords are subjective and can be human-generated
 				\item Expected precision, recall and F-score from available literature in the range of $10 - 40 \%$
 				\item Selecting the top \textit{n} keywords calculated by the model, where
 				$ n $ is the number of true keywords from the dataset  
+				\item Using partial overlap for keyphrases
 			\end{itemize}
 			\end{onlyenv}
 		
