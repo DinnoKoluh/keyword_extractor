@@ -1,6 +1,5 @@
 import pandas as pd
 from ast import literal_eval
-import networkx as nx
 from KeywordExtractor import KeywordExtractor
 import json
 import numpy as np
@@ -57,6 +56,9 @@ def is_predicted_keyword_in_list(predicted_keyword, true_keywords):
     return False
 
 def get_prf(true_keywords: list, predicted_keywords: list):
+    """
+    Return the Precision, Recall and F-score for the given keyword lists
+    """
     tp, fp, fn = 0, 0, 0
 
     for predicted_keyword in predicted_keywords:
@@ -84,7 +86,8 @@ def save_data(metrics_dict, predicted_keywords_dict, df, ws):
     result_df = pd.concat([df, new_data], axis=1)
     result_df.to_csv(f'data/metrics_per_abstract_{ws}.csv', index=False)
 
-def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int):
+
+def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int, number_of_papers: int = 10):
     """
     Make csv of the graph with the respective ranking algorithm.
     """
@@ -103,7 +106,7 @@ def make_keyword_metrics(methods: dict, path_to_file: str, window_size: int):
         metrics_dict[f'{value}_r'] = []
         metrics_dict[f'{value}_f'] = []
 
-    for i, abstract in enumerate(joined):
+    for i, abstract in enumerate(joined[:number_of_papers]):
         ke = KeywordExtractor(abstract, window_size)
         ke.add_we_weights()
         num_of_true_keywords = len(keywords[i])
